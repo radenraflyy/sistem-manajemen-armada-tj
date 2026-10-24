@@ -1,1 +1,12 @@
 @import "tailwindcss";
+
+@theme {
+  --font-pt-sans: "PT Sans", Arial, sans-serif;
+  --color-tj-navy: #06367c;
+  --color-tj-blue: #0846a1;
+  --color-tj-blue-bright: #35a2ff;
+  --color-tj-ink: #17283f;
+  --color-tj-muted: #64748b;
+  --color-tj-surface: #ffffff;
+  --color-tj-border: #dce3eb;
+}
