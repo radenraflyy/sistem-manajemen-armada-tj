@@ -7,6 +7,7 @@ import { RouterProvider } from 'react-router/dom';
 import { queryClient } from './data-service/query-client.ts';
 import { router } from './router.tsx';
 import './index.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 
 createRoot(document.getElementById('root')!).render(

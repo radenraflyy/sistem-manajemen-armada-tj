@@ -16,6 +16,7 @@ export const router = createBrowserRouter([
     path: '/routes',
     element: (
       <SectionPage
+        kind='routes'
         description='Kelola dan pantau informasi rute layanan Transjakarta.'
         title='Routes'
       />
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
     path: '/trips',
     element: (
       <SectionPage
+        kind='trips'
         description='Pantau perjalanan dan status operasional setiap trip.'
         title='Trips'
       />
@@ -32,20 +34,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '/map-views',
-    element: (
-      <SectionPage
-        description='Lihat posisi armada dan cakupan layanan pada peta.'
-        title='Map Views'
-      />
-    ),
+    element: <App initialView='map' />,
   },
   {
     path: '*',
-    element: (
-      <SectionPage
-        description='Halaman yang Anda cari tidak tersedia.'
-        title='404 — Page not found'
-      />
-    ),
+    element: <Navigate replace to='/vehicle' />,
   },
 ]);

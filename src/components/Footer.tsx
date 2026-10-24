@@ -6,7 +6,7 @@ const Footer = () => {
           <img
             alt=""
             className="size-10 object-contain"
-            src="/icon-tj.png"
+            src="/icon-tj-brand.png"
           />
           <div>
             <p className="text-sm font-bold">PT Transportasi Jakarta</p>

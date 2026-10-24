@@ -1,15 +1,21 @@
+import LoadingIndicator from './LoadingIndicator';
+
+export type DashboardView = 'grid' | 'table' | 'map';
+
 type DashboardToolbarProps = {
   query: string;
   onQueryChange: (query: string) => void;
   resultCount: number;
-  view: "grid" | "table";
-  onViewChange: (view: "grid" | "table") => void;
+  isFetching: boolean;
+  view: DashboardView;
+  onViewChange: (view: DashboardView) => void;
 };
 
 const DashboardToolbar = ({
   query,
   onQueryChange,
   resultCount,
+  isFetching,
   view,
   onViewChange,
 }: DashboardToolbarProps) => {
@@ -37,37 +43,50 @@ const DashboardToolbar = ({
       </label>
 
       <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
-        <span className="inline-flex items-center gap-2 whitespace-nowrap text-xs font-medium text-slate-500">
-          <span className="size-2 rounded-full bg-emerald-500" />
-          <strong className="text-slate-700">{resultCount}</strong> armada terlihat
+        {isFetching && <LoadingIndicator className='whitespace-nowrap' label='Memperbarui data...' size='small' />}
+        <span className="whitespace-nowrap text-xs font-medium text-slate-500">
+          <strong className="text-slate-700">{resultCount}</strong> kendaraan ditampilkan
         </span>
         <span className="hidden h-6 w-px bg-slate-200 sm:block" />
         <div className="flex rounded-xl bg-slate-100 p-1">
           <button
-            aria-pressed={view === "grid"}
+            aria-pressed={view === 'grid'}
             className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition active:scale-[0.98] ${
-              view === "grid"
-                ? "bg-white text-tj-blue shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+              view === 'grid'
+                ? 'bg-white text-tj-blue shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
-            onClick={() => onViewChange("grid")}
+            onClick={() => onViewChange('grid')}
             type="button"
           >
             <span aria-hidden="true">▦</span>
             Grid
           </button>
           <button
-            aria-pressed={view === "table"}
+            aria-pressed={view === 'table'}
             className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition active:scale-[0.98] ${
-              view === "table"
-                ? "bg-white text-tj-blue shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+              view === 'table'
+                ? 'bg-white text-tj-blue shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
             }`}
-            onClick={() => onViewChange("table")}
+            onClick={() => onViewChange('table')}
             type="button"
           >
             <span aria-hidden="true">☷</span>
             Tabel
+          </button>
+          <button
+            aria-pressed={view === 'map'}
+            className={`inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition active:scale-[0.98] ${
+              view === 'map'
+                ? 'bg-white text-tj-blue shadow-sm'
+                : 'text-slate-500 hover:text-slate-700'
+            }`}
+            onClick={() => onViewChange('map')}
+            type='button'
+          >
+            <span aria-hidden='true'>⌖</span>
+            Peta
           </button>
         </div>
       </div>

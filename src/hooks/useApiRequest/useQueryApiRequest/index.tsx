@@ -20,14 +20,8 @@ export interface UseQueryApiRequestProps<T> {
     query?: { [key: string]: unknown };
   };
   options?: Omit<UseQueryOptions<T, AxiosErrorResponse>, 'queryKey'>;
-  needAuth?: boolean;
 }
-function useQueryApiRequest<T = unknown>({
-  key,
-  options,
-  config,
-  needAuth = true,
-}: UseQueryApiRequestProps<T>) {
+function useQueryApiRequest<T = unknown>({ key, options, config }: UseQueryApiRequestProps<T>) {
   const url = allQueries[key];
   const queryClient = useQueryClient();
   const replacedUrl = constructUrl(url, config);
