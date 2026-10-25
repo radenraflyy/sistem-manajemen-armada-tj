@@ -1,75 +1,44 @@
-# React + TypeScript + Vite
+# Sistem Manajemen Armada
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dashboard armada berbasis React, TypeScript, Vite, dan MBTA V3 API. Aplikasi menyediakan halaman kendaraan, rute, trip, serta peta armada.
 
-Currently, two official plugins are available:
+## Menjalankan aplikasi
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Gunakan Node.js dan Yarn Classic yang kompatibel dengan Vite 8.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+yarn install
+yarn dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+API menggunakan `https://api-v3.mbta.com` secara default. Untuk mengganti base URL, buat file `.env.local`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```env
+VITE_API_BASE_URL=https://api-v3.mbta.com
 ```
+
+## Pemeriksaan kode
+
+```bash
+yarn lint          # ESLint
+yarn format        # Terapkan format Prettier
+yarn format:check  # Periksa format tanpa mengubah file
+yarn build         # TypeScript dan production build
+yarn quality       # Jalankan ESLint, Prettier, dan build
+```
+
+Husky menjalankan ESLint dan Prettier pada file staged sebelum commit. Sebelum push, Husky menjalankan `yarn quality`.
+
+## Struktur source
+
+- `src/components`: komponen UI reusable; `vehicles` dan `service-data` menyimpan komponen per fitur.
+- `src/views`: layar utama per fitur, dirangkai dari komponen reusable.
+- `src/pages`: wrapper tipis yang memasangkan view dengan route aplikasi.
+- `src/layouts`: kerangka bersama untuk halaman aplikasi, seperti header, footer, dan outlet route.
+- `src/constants`: label status dan rute, batas halaman API, serta kebijakan cache armada.
+- `src/data-service/queries`: daftar endpoint API yang dipisah menjadi domain `vehicles`, `routes`, dan `trips`.
+- `src/services`: request dan query per domain, dengan parsing respons bersama di `mbtaApi.ts`.
+- `src/hooks`: state filter URL sehingga pencarian, filter, dan pagination bertahan saat halaman dimuat ulang.
+- `src/utils`: helper dan fungsi pemfilteran/pengelompokan data yang dapat digunakan lintas halaman.
+
+Halaman dimuat dengan lazy loading. Komponen peta dan library MapLibre juga dipisahkan dari bundle halaman awal.

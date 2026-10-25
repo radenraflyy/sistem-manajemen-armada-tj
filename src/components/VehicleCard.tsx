@@ -1,4 +1,4 @@
-import type { Vehicle } from '../data-service/types';
+import type { Vehicle } from '../types/fleet';
 
 type VehicleCardProps = {
   vehicle: Vehicle;
@@ -6,7 +6,7 @@ type VehicleCardProps = {
 };
 
 const statusStyles: Record<Vehicle['status'], string> = {
-  Bergerak: 'bg-blue-50 text-blue-700',
+  Berjalan: 'bg-blue-50 text-blue-700',
   Berhenti: 'bg-emerald-50 text-emerald-700',
   Mendekati: 'bg-amber-50 text-amber-700',
   'Tidak diketahui': 'bg-slate-100 text-slate-600',
@@ -42,12 +42,9 @@ const VehicleCard = ({ vehicle, onDetails }: VehicleCardProps) => (
 
     <div className='mt-4 min-h-12'>
       <p className='text-xs leading-relaxed text-slate-500'>
-        Tujuan:{' '}
-        <strong className='font-semibold text-slate-700'>{vehicle.destination}</strong>
+        Tujuan: <strong className='font-semibold text-slate-700'>{vehicle.destination}</strong>
       </p>
-      <p className='mt-1 text-xs leading-relaxed text-slate-500'>
-        Halte: {vehicle.origin}
-      </p>
+      <p className='mt-1 text-xs leading-relaxed text-slate-500'>Halte: {vehicle.origin}</p>
     </div>
 
     <div className='mt-4 flex items-center justify-between gap-2 text-[11px]'>

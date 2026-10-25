@@ -1,14 +1,10 @@
 type ConfigType = {
-  params?: { [key: string]: string };
-  query?: { [key: string]: unknown };
+  params?: Record<string, string>;
+  query?: Record<string, unknown>;
 };
 
-export const constructUrl = (baseUrl: string, config: ConfigType = {}): string => {
-  const { params = {} } = config;
-
-  const newUrl = baseUrl.replaceAll(/\/:(\w+)/g, (_, value) => {
-    const replacedValue = params?.[value] ?? 'undefined';
-    return '/' + encodeURIComponent(replacedValue);
+export const constructUrl = (baseUrl: string, config: ConfigType = {}): string =>
+  baseUrl.replaceAll(/\/:([\w]+)/g, (_segment, parameter: string) => {
+    const value = config.params?.[parameter] ?? 'undefined';
+    return `/${encodeURIComponent(value)}`;
   });
-  return newUrl;
-};

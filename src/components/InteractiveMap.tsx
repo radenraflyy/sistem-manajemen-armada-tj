@@ -1,29 +1,31 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import {
   AttributionControl,
+  type GeoJSONSource,
   LngLatBounds,
   Map,
+  type MapLayerMouseEvent,
+  type Map as MapLibreMap,
+  type MapMouseEvent,
   NavigationControl,
   Popup,
   setWorkerUrl,
-  type GeoJSONSource,
-  type Map as MapLibreMap,
-  type MapLayerMouseEvent,
-  type MapMouseEvent,
 } from 'maplibre-gl';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-import type { Vehicle } from '../data-service/types';
+import type { Vehicle } from '../types/fleet';
 
 const MIN_ZOOM = 9;
 const MAX_ZOOM = 18;
 const INITIAL_CENTER: [number, number] = [-71.0589, 42.3601];
 const VEHICLE_SOURCE = 'vehicles';
 const ROUTE_SOURCE = 'routes';
-const vehicleStatuses = ['Bergerak', 'Berhenti', 'Mendekati', 'Tidak diketahui'] as const;
+const vehicleStatuses = ['Berjalan', 'Berhenti', 'Mendekati', 'Tidak diketahui'] as const;
 const vehicleKinds = ['bus', 'rail', 'ferry'] as const;
 const markerColors: Record<(typeof vehicleStatuses)[number], string> = {
-  Bergerak: '#2563eb',
+  Berjalan: '#2563eb',
   Berhenti: '#059669',
   Mendekati: '#d97706',
   'Tidak diketahui': '#64748b',
@@ -76,17 +78,16 @@ function featureCollections(vehicles: Vehicle[]) {
   const vehicleFeatures = vehicles.flatMap((vehicle) => {
     if (vehicle.latitude === null || vehicle.longitude === null) return [];
     const color = markerColors[vehicle.status];
-    const kind = vehicle.routeDetails.type === 3
-      ? 'bus'
-      : vehicle.routeDetails.type === 4
-        ? 'ferry'
-        : 'rail';
-    return [{
-      type: 'Feature' as const,
-      id: vehicle.id,
-      geometry: { type: 'Point' as const, coordinates: [vehicle.longitude, vehicle.latitude] },
-      properties: { vehicleId: vehicle.id, color, icon: `vehicle-${kind}-${vehicle.status}` },
-    }];
+    const kind =
+      vehicle.routeDetails.type === 3 ? 'bus' : vehicle.routeDetails.type === 4 ? 'ferry' : 'rail';
+    return [
+      {
+        type: 'Feature' as const,
+        id: vehicle.id,
+        geometry: { type: 'Point' as const, coordinates: [vehicle.longitude, vehicle.latitude] },
+        properties: { vehicleId: vehicle.id, color, icon: `vehicle-${kind}-${vehicle.status}` },
+      },
+    ];
   });
 
   const seenShapes = new Set<string>();
@@ -96,11 +97,13 @@ function featureCollections(vehicles: Vehicle[]) {
     seenShapes.add(key);
     const coordinates = decodePolyline(vehicle.routePolyline);
     if (coordinates.length < 2) return [];
-    return [{
-      type: 'Feature' as const,
-      geometry: { type: 'LineString' as const, coordinates },
-      properties: { color: vehicle.routeDetails.color ?? '#475569' },
-    }];
+    return [
+      {
+        type: 'Feature' as const,
+        geometry: { type: 'LineString' as const, coordinates },
+        properties: { color: vehicle.routeDetails.color ?? '#475569' },
+      },
+    ];
   });
 
   return {
@@ -190,7 +193,9 @@ function makeVehicleMarker(color: string, kind: (typeof vehicleKinds)[number]) {
 function fitVehicles(map: MapLibreMap, vehicles: Vehicle[]) {
   const coordinates = vehicles
     .filter((vehicle) => vehicle.latitude !== null && vehicle.longitude !== null)
-    .map((vehicle) => [vehicle.longitude as number, vehicle.latitude as number] as [number, number]);
+    .map(
+      (vehicle) => [vehicle.longitude as number, vehicle.latitude as number] as [number, number],
+    );
   if (coordinates.length === 0) return;
   if (coordinates.length === 1) {
     map.flyTo({ center: coordinates[0], zoom: 14, duration: 650 });
@@ -251,10 +256,12 @@ function InteractiveMap({
   const fittedInitialDataRef = useRef(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
-  vehiclesRef.current = vehicles;
-  selectedVehicleIdRef.current = selectedVehicleId;
-  detailsRef.current = onVehicleDetails;
-  selectRef.current = onVehicleSelect;
+  useEffect(() => {
+    vehiclesRef.current = vehicles;
+    selectedVehicleIdRef.current = selectedVehicleId;
+    detailsRef.current = onVehicleDetails;
+    selectRef.current = onVehicleSelect;
+  }, [onVehicleDetails, onVehicleSelect, selectedVehicleId, vehicles]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -296,7 +303,10 @@ function InteractiveMap({
           if (icon) map.addImage(`vehicle-${kind}-${status}`, icon, { pixelRatio: 2 });
         }
       }
-      map.addSource(ROUTE_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addSource(ROUTE_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
       map.addLayer({
         id: 'route-lines',
         type: 'line',
@@ -307,7 +317,10 @@ function InteractiveMap({
           'line-opacity': 0.72,
         },
       });
-      map.addSource(VEHICLE_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addSource(VEHICLE_SOURCE, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      });
       map.addLayer({
         id: 'vehicle-points',
         type: 'symbol',
@@ -340,8 +353,12 @@ function InteractiveMap({
           .setDOMContent(makePopup(vehicle, detailsRef.current))
           .addTo(map);
       });
-      map.on('mouseenter', 'vehicle-points', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'vehicle-points', () => { map.getCanvas().style.cursor = ''; });
+      map.on('mouseenter', 'vehicle-points', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'vehicle-points', () => {
+        map.getCanvas().style.cursor = '';
+      });
       map.on('click', (event: MapMouseEvent) => {
         if (map.queryRenderedFeatures(event.point, { layers: ['vehicle-points'] }).length) return;
         popupRef.current?.remove();
@@ -367,7 +384,12 @@ function InteractiveMap({
     (map.getSource(VEHICLE_SOURCE) as GeoJSONSource | undefined)?.setData(vehicleData as never);
     (map.getSource(ROUTE_SOURCE) as GeoJSONSource | undefined)?.setData(routeData as never);
     const selectedVehicle = vehicles.find((vehicle) => vehicle.id === selectedVehicleIdRef.current);
-    if (selectedVehicle && selectedVehicle.latitude !== null && selectedVehicle.longitude !== null && popupRef.current) {
+    if (
+      selectedVehicle &&
+      selectedVehicle.latitude !== null &&
+      selectedVehicle.longitude !== null &&
+      popupRef.current
+    ) {
       popupRef.current
         .setLngLat([selectedVehicle.longitude, selectedVehicle.latitude])
         .setDOMContent(makePopup(selectedVehicle, detailsRef.current));
@@ -408,10 +430,16 @@ function InteractiveMap({
   }, [selectedVehicleId, showSelectedVehicle]);
 
   return (
-    <section className={`relative isolate overflow-hidden rounded-2xl border border-slate-200 bg-[#e8edf0] shadow-sm ${className}`} aria-label='Peta interaktif armada'>
+    <section
+      className={`relative isolate overflow-hidden rounded-2xl border border-slate-200 bg-[#e8edf0] shadow-sm ${className}`}
+      aria-label='Peta interaktif armada'
+    >
       <div ref={containerRef} className='h-full w-full' />
       {mapError && (
-        <div className='absolute inset-x-3 top-3 z-20 rounded-lg border border-amber-200 bg-white/95 px-3 py-2 text-xs text-amber-900 shadow-sm' role='status'>
+        <div
+          className='absolute inset-x-3 top-3 z-20 rounded-lg border border-amber-200 bg-white/95 px-3 py-2 text-xs text-amber-900 shadow-sm'
+          role='status'
+        >
           Peta gagal dimuat. Periksa koneksi internet, lalu muat ulang halaman.
         </div>
       )}
@@ -419,16 +447,25 @@ function InteractiveMap({
         <>
           <button
             className='absolute bottom-3 left-3 z-10 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs font-semibold text-tj-blue shadow-sm hover:bg-white'
-            onClick={() => { const map = mapRef.current; if (map) fitVehicles(map, vehicles); }}
+            onClick={() => {
+              const map = mapRef.current;
+              if (map) fitVehicles(map, vehicles);
+            }}
             type='button'
           >
             Tampilkan semua
           </button>
           {showLegend && (
             <div className='absolute bottom-3 right-14 z-10 hidden items-center gap-2 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-[10px] text-slate-600 shadow-sm sm:flex'>
-              <span className='inline-flex items-center gap-1'><span className='size-2 rounded-full bg-blue-600' /> Bergerak</span>
-              <span className='inline-flex items-center gap-1'><span className='size-2 rounded-full bg-emerald-600' /> Berhenti</span>
-              <span className='inline-flex items-center gap-1'><span className='size-2 rounded-full bg-amber-600' /> Mendekati</span>
+              <span className='inline-flex items-center gap-1'>
+                <span className='size-2 rounded-full bg-blue-600' /> Berjalan
+              </span>
+              <span className='inline-flex items-center gap-1'>
+                <span className='size-2 rounded-full bg-emerald-600' /> Berhenti
+              </span>
+              <span className='inline-flex items-center gap-1'>
+                <span className='size-2 rounded-full bg-amber-600' /> Mendekati
+              </span>
             </div>
           )}
         </>

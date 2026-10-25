@@ -1,4 +1,4 @@
-export type VehicleStatus = "Bergerak" | "Berhenti" | "Mendekati" | "Tidak diketahui";
+export type VehicleStatus = 'Berjalan' | 'Berhenti' | 'Mendekati' | 'Tidak diketahui';
 
 export type Vehicle = {
   id: string;
@@ -46,7 +46,44 @@ export type Vehicle = {
   revenue: string | null;
 };
 
+export type RouteOption = {
+  id: string;
+  label: string;
+  shortName: string;
+  longName: string;
+};
 
-export type QueriesDataService<T extends string> = {
-  [key in T]: string;
+export type TripOption = {
+  id: string;
+  label: string;
+  routeId: string | null;
+};
+
+export type RouteRow = {
+  id: string;
+  shortName: string;
+  longName: string;
+  type: number | null;
+  color: string | null;
+  directionNames: string[];
+};
+
+export type TripRow = {
+  id: string;
+  routeId: string | null;
+  routeName: string;
+  headsign: string;
+  directionId: number | null;
+  startTime: string | null;
+  endTime: string | null;
+  wheelchairAccessible: number | null;
+};
+
+export type VehicleSummary = {
+  total: number;
+  moving: number;
+  stopped: number;
+  approaching: number;
+  routes: number;
+  vehiclesByRoute: Record<string, number>;
 };

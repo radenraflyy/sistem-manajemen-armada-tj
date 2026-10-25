@@ -11,7 +11,7 @@ const logoSizes = {
 };
 
 const LoadingIndicator = ({
-  label = 'Memuat data...',
+  label = 'Loading...',
   size = 'medium',
   className = '',
 }: LoadingIndicatorProps) => (

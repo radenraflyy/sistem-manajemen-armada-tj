@@ -7,7 +7,21 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "quality": "yarn lint && yarn format:check && yarn build",
+    "postinstall": "husky",
     "preview": "vite preview"
+  },
+  "lint-staged": {
+    "*.{js,mjs,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html,json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
@@ -32,6 +46,8 @@
     "eslint-plugin-react-refresh": "^0.5.7",
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "prettier": "3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3",

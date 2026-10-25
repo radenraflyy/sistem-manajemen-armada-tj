@@ -1,51 +1,50 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks, { rules } from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import js from '@eslint/js';
+import prettier from 'eslint-plugin-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import unusedImports from 'eslint-plugin-unused-imports';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'coverage', 'node_modules']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{js,mjs,ts,tsx}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommended,
+      ...tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     languageOptions: {
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
     },
     plugins: {
-      reactHooks,
-      reactRefresh,
-      tseslint,
-      'unused-imports': require('eslint-plugin-unused-imports'),
-      'prettier': require('eslint-plugin-prettier'),
-      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
+      prettier,
+      'unused-imports': unusedImports,
     },
     rules: {
-      ...rules,
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/no-explicit-any": "error",
-      "unused-imports/no-unused-vars": [
-      "warn",
-      {
-        
-        "vars": "all",
-        "varsIgnorePattern": "^_",
-        "args": "after-used",
-        "argsIgnorePattern": "^_"
-      }
-    ],
-    "prettier/prettier": [
-      "error",
-      {
-        "endOfLine": "auto"
-      }
-    ],
-    }
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+      'prettier/prettier': 'error',
+    },
   },
-])
+  {
+    files: ['src/router.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
+]);

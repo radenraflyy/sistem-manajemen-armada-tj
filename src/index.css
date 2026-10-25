@@ -1,7 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-pt-sans: "PT Sans", Arial, sans-serif;
+  --font-pt-sans: 'PT Sans', Arial, sans-serif;
   --color-tj-navy: #06367c;
   --color-tj-blue: #0846a1;
   --color-tj-blue-bright: #35a2ff;
@@ -9,4 +9,22 @@
   --color-tj-muted: #64748b;
   --color-tj-surface: #ffffff;
   --color-tj-border: #dce3eb;
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+  }
 }

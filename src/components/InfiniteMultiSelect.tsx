@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useDebouncedValue } from '../hooks/useDebouncedSearch';
 import LoadingIndicator from './LoadingIndicator';
 
 export type MultiSelectOption = {
@@ -43,21 +44,26 @@ const InfiniteMultiSelect = ({
 }: InfiniteMultiSelectProps) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef(onLoadMore);
-  loadMoreRef.current = onLoadMore;
+  const isOpen = open && !disabled;
   const filteredOptions = useMemo(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase();
+    const normalizedSearch = debouncedSearch.trim().toLocaleLowerCase();
     if (!normalizedSearch) return options;
     return options.filter((option) =>
       `${option.label} ${option.description ?? ''}`.toLocaleLowerCase().includes(normalizedSearch),
     );
-  }, [options, search]);
+  }, [debouncedSearch, options]);
 
   useEffect(() => {
-    if (!open || !sentinelRef.current || !scrollRef.current || !hasNextPage) return;
+    loadMoreRef.current = onLoadMore;
+  }, [onLoadMore]);
+
+  useEffect(() => {
+    if (!isOpen || !sentinelRef.current || !scrollRef.current || !hasNextPage) return;
     const root = scrollRef.current;
     const sentinel = sentinelRef.current;
     const observer = new IntersectionObserver(
@@ -70,10 +76,10 @@ const InfiniteMultiSelect = ({
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, open]);
+  }, [hasNextPage, isFetchingNextPage, isOpen]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const closeOnOutsideClick = (event: MouseEvent) => {
       if (event.target instanceof Node && !rootRef.current?.contains(event.target)) {
         setOpen(false);
@@ -81,32 +87,27 @@ const InfiniteMultiSelect = ({
     };
     document.addEventListener('mousedown', closeOnOutsideClick);
     return () => document.removeEventListener('mousedown', closeOnOutsideClick);
-  }, [open]);
+  }, [isOpen]);
 
-  useEffect(() => {
-    if (disabled) setOpen(false);
-  }, [disabled]);
-
-  const selectedLabel =
-    selectedIds.length === 0
-      ? placeholder
-      : `${selectedIds.length} dipilih`;
+  const selectedLabel = selectedIds.length === 0 ? placeholder : `${selectedIds.length} dipilih`;
 
   return (
     <div className='relative' ref={rootRef}>
       <span className='mb-2 block text-sm font-semibold text-slate-700'>{label}</span>
       <button
-        aria-expanded={open}
+        aria-expanded={isOpen}
         className='flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-600 outline-none transition hover:border-blue-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400'
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
         type='button'
       >
         <span className='truncate'>{selectedLabel}</span>
-        <span aria-hidden='true' className='text-xs'>⌄</span>
+        <span aria-hidden='true' className='text-xs'>
+          ⌄
+        </span>
       </button>
 
-      {error && !open && (
+      {error && !isOpen && (
         <div className='mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2' role='alert'>
           <p className='text-xs text-red-700'>{error}</p>
           <button
@@ -119,7 +120,7 @@ const InfiniteMultiSelect = ({
         </div>
       )}
 
-      {open && (
+      {isOpen && (
         <div className='absolute z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl'>
           <input
             aria-label={`Cari ${label.toLocaleLowerCase()}`}

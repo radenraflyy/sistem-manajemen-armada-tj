@@ -1,4 +1,4 @@
-import type { VehicleStatus } from '../data-service/types';
+import type { VehicleStatus } from '../types/fleet';
 import InfiniteMultiSelect, { type MultiSelectOption } from './InfiniteMultiSelect';
 
 type StatusFilter = 'Semua' | VehicleStatus;
@@ -72,7 +72,7 @@ const Sidebar = ({
 }: SidebarProps) => {
   const statusOptions: { label: string; value: StatusFilter }[] = [
     { label: 'Semua armada', value: 'Semua' },
-    { label: 'Sedang berjalan', value: 'Bergerak' },
+    { label: 'Sedang berjalan', value: 'Berjalan' },
     { label: 'Berhenti di halte', value: 'Berhenti' },
     { label: 'Mendekati halte', value: 'Mendekati' },
   ];
@@ -160,11 +160,8 @@ const Sidebar = ({
       <section className='mt-7' aria-labelledby='network-title'>
         <div className='mb-3 flex items-center justify-between gap-2'>
           <h3 id='network-title' className='text-[11px] font-bold tracking-widest text-slate-500'>
-            METRIK OPERASIONAL
+            Informasi
           </h3>
-          <span className='rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-600'>
-            MBTA
-          </span>
         </div>
         <div className='rounded-xl bg-linear-to-br from-tj-navy to-tj-blue p-4 text-white shadow-sm'>
           <div className='flex items-center justify-between text-xs text-blue-100'>

@@ -1,34 +1,31 @@
 import { useCallback } from 'react';
 
-import axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosError } from 'axios';
 
 import type { SuccessResponse } from '@/types';
 
-import type { ResponsePayload } from './types';
+import type { AxiosFetchParams, ResponsePayload } from './types';
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-v3.mbta.com',
 });
 
-function useAxiosWithoutAuth<T = any>() {
-  const axiosFetch = useCallback(
-    async (config: AxiosRequestConfig) => {
-      if (!axiosInstance.defaults.baseURL) throw new Error('Base URL is required.');
-      if (!config.url) throw new Error('Request URL is required.');
-      if (config.url.includes('undefined')) {
-        throw new Error('Request URL contains an undefined value.');
+function useAxiosWithoutAuth<T = unknown>() {
+  return useCallback(async (config: AxiosFetchParams) => {
+    if (!axiosInstance.defaults.baseURL) throw new Error('Base URL is required.');
+    if (config.url.includes('undefined')) {
+      throw new Error('Request URL contains an undefined value.');
+    }
+
+    try {
+      return await axiosInstance<SuccessResponse<T>>(config);
+    } catch (error) {
+      if (axios.isAxiosError<ResponsePayload>(error) && error.response?.status === 401) {
+        return undefined;
       }
-
-      return await axiosInstance<SuccessResponse<T>>(config).catch(
-        async (err: AxiosError<ResponsePayload>) => {
-          if (![401].includes(err.response?.status || 0)) throw err;
-        },
-      );
-    },
-    [],
-  );
-
-  return axiosFetch;
+      throw error as AxiosError<ResponsePayload>;
+    }
+  }, []);
 }
 
 export default useAxiosWithoutAuth;

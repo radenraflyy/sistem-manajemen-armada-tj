@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 
 export interface Data<T> {
   page: number;
@@ -7,25 +7,20 @@ export interface Data<T> {
   items: T[];
 }
 
-export interface ListPagination<T> {
-  page: number;
-  perPage: number;
-  totalItems: number;
-  items: T[];
-}
+export type ListPagination<T> = Data<T>;
 
 export interface InfiniteList<T> {
   perPage: number;
-  next: string;
+  next: string | null;
   items: T[];
 }
 
 export interface ErrorResponse {
-  error: string;
+  error?: string;
   message: string;
 }
 
-export interface AxiosErrorResponse extends AxiosError<ErrorResponse> {}
+export type AxiosErrorResponse = AxiosError<ErrorResponse>;
 
 export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
 
@@ -36,13 +31,11 @@ export interface QueryPagination<T = unknown, O = unknown> {
   items: T[];
   otherItem?: O;
 }
-// eslint-disable-next-line
-export interface SuccessResponse<T = any> {
+
+export interface SuccessResponse<T = unknown> {
   message: string;
   data: T;
 }
-
-export interface AxiosErrorResponse extends AxiosError<ErrorResponse> {}
 
 export type TRefDialogFilter<T> = {
   open(dataFilter?: T): void;
