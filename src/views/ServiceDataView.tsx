@@ -18,7 +18,6 @@ import {
 import { getRouteTripCount, useTripsPageQuery } from '../services/trips';
 import { useVehicleSummaryQuery } from '../services/vehicles';
 import type { RouteRow, TripRow } from '../types/fleet';
-import { getFriendlyErrorMessage } from '../utils/getFriendlyErrorMessage';
 import { matchesRouteGroup } from '../utils/routeGroups';
 
 type SectionPageProps = {
@@ -115,7 +114,7 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
       : [],
   });
 
-  const retryMessage = error ? getFriendlyErrorMessage(error, isRoutes ? 'rute' : 'trip') : null;
+  const retryMessage = error?.message ?? `Data ${isRoutes ? 'rute' : 'trip'} gagal dimuat.`;
 
   return (
     <main className='mx-auto w-full max-w-[1600px] flex-1 px-5 py-7 sm:px-8 lg:px-10'>
@@ -150,11 +149,7 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
           onSelectLoadedRoutes={() => setSelectedRouteIds(routeOptions.map((route) => route.id))}
           onClearRoutes={() => setSelectedRouteIds([])}
           routesLoading={routeOptionsQuery.isPending}
-          routesError={
-            routeOptionsQuery.isError
-              ? getFriendlyErrorMessage(routeOptionsQuery.error, 'rute')
-              : null
-          }
+          routesError={routeOptionsQuery.isError ? routeOptionsQuery.error.message : null}
           routesHasNextPage={routeOptionsQuery.hasNextPage ?? false}
           routesFetchingNextPage={routeOptionsQuery.isFetchingNextPage}
           onLoadMoreRoutes={() => {

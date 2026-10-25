@@ -5,14 +5,12 @@ import { type QueryKey, type UseQueryOptions, useQuery } from '@tanstack/react-q
 import { type ApiRequestConfig, requestApiData } from '@/data-service/apiClient';
 import { type AllQueriesKeys, allQueries } from '@/data-service/queries';
 
-import type { AxiosErrorResponse } from '../types';
-
 export interface UseQueryApiRequestProps<T> {
   key: AllQueriesKeys;
   config?: ApiRequestConfig;
   queryKey?: QueryKey;
   queryFn?: () => Promise<T>;
-  options?: Omit<UseQueryOptions<T, AxiosErrorResponse, T, QueryKey>, 'queryKey' | 'queryFn'>;
+  options?: Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>;
 }
 
 function useQueryApiRequest<T = unknown>({
@@ -30,13 +28,13 @@ function useQueryApiRequest<T = unknown>({
   );
 
   const queryOptions: Partial<
-    Omit<UseQueryOptions<T, AxiosErrorResponse, T, QueryKey>, 'queryKey' | 'queryFn'>
+    Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>
   > = {
     retry: 1,
     ...options,
   };
 
-  return useQuery<T, AxiosErrorResponse>({
+  return useQuery<T, Error>({
     queryKey: queryKey ?? [key, url, config],
     queryFn: fetchData,
     ...queryOptions,

@@ -86,4 +86,5 @@ export type VehicleSummary = {
   approaching: number;
   routes: number;
   vehiclesByRoute: Record<string, number>;
+  activeTrips: { id: string; routeId: string }[];
 };

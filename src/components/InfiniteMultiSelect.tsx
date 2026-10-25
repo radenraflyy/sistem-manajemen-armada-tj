@@ -14,6 +14,7 @@ type InfiniteMultiSelectProps = {
   placeholder: string;
   options: MultiSelectOption[];
   selectedIds: string[];
+  selectLoadedLabel?: string;
   onToggle: (id: string) => void;
   onSelectLoaded: () => void;
   onClear: () => void;
@@ -31,6 +32,7 @@ const InfiniteMultiSelect = ({
   placeholder,
   options,
   selectedIds,
+  selectLoadedLabel = 'Pilih yang dimuat',
   onToggle,
   onSelectLoaded,
   onClear,
@@ -137,7 +139,7 @@ const InfiniteMultiSelect = ({
               onClick={onSelectLoaded}
               type='button'
             >
-              Pilih yang dimuat ({options.length})
+              {selectLoadedLabel} ({options.length})
             </button>
             <button
               className='text-xs font-semibold text-slate-500 hover:underline disabled:text-slate-300'

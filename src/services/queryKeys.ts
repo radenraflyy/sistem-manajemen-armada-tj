@@ -1,6 +1,7 @@
 export const vehicleQueryKeys = {
   all: ['vehicles'] as const,
-  list: (page: number, pageSize: number) => ['vehicles', 'list', page, pageSize] as const,
+  list: (page: number, pageSize: number, routeIds: string[], tripIds: string[]) =>
+    ['vehicles', 'list', page, pageSize, [...routeIds].sort(), [...tripIds].sort()] as const,
   summary: () => ['vehicles', 'summary'] as const,
   detail: (id: string) => ['vehicles', 'detail', id] as const,
 };

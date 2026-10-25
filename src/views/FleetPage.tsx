@@ -19,7 +19,6 @@ import { useTripsInfiniteQuery } from '../services/trips';
 import { useVehicleSummaryQuery, useVehiclesQuery } from '../services/vehicles';
 import type { Vehicle } from '../types/fleet';
 import { filterVehicles } from '../utils/filterVehicles';
-import { getFriendlyErrorMessage } from '../utils/getFriendlyErrorMessage';
 
 const EMPTY_VEHICLES: Vehicle[] = [];
 
@@ -47,19 +46,24 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
   const vehiclesQuery = useVehiclesQuery(
     view === 'map' ? 1 : page,
     view === 'map' ? FLEET_API_PAGE_SIZE : pageSize,
+    selectedRouteIds,
+    selectedTripIds,
   );
   const vehicleSummaryQuery = useVehicleSummaryQuery();
   const routesQuery = useRoutesInfiniteQuery();
   const vehicles = vehiclesQuery.data?.items ?? EMPTY_VEHICLES;
   const totalVehicles = vehicleSummaryQuery.data?.total ?? 0;
   const hasVehicleData = vehiclesQuery.data !== undefined;
-  const routeOptions = useMemo(
-    () => routesQuery.data?.pages.flatMap((page) => page.items) ?? [],
-    [routesQuery.data],
-  );
+  const routeOptions = useMemo(() => {
+    const routes = routesQuery.data?.pages.flatMap((page) => page.items) ?? [];
+    const activeRouteIds = new Set(Object.keys(vehicleSummaryQuery.data?.vehiclesByRoute ?? {}));
+    return routes.toSorted(
+      (left, right) => Number(activeRouteIds.has(right.id)) - Number(activeRouteIds.has(left.id)),
+    );
+  }, [routesQuery.data, vehicleSummaryQuery.data?.vehiclesByRoute]);
   const tripsQuery = useTripsInfiniteQuery(selectedRouteIds);
-  const tripOptions = useMemo(
-    () =>
+  const tripOptions = useMemo(() => {
+    const loadedTrips =
       tripsQuery.data?.pages.flatMap((page) =>
         page.items.map((trip) => ({
           id: trip.id,
@@ -71,9 +75,25 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
             .filter(Boolean)
             .join(' · '),
         })),
-      ) ?? [],
-    [routeOptions, tripsQuery.data],
-  );
+      ) ?? [];
+    const activeTrips = new Map<string, (typeof loadedTrips)[number]>();
+    for (const trip of vehicleSummaryQuery.data?.activeTrips ?? []) {
+      if (
+        activeTrips.has(trip.id) ||
+        (selectedRouteIds.length > 0 && !selectedRouteIds.includes(trip.routeId))
+      ) {
+        continue;
+      }
+      const route = routeOptions.find((option) => option.id === trip.routeId);
+      activeTrips.set(trip.id, {
+        id: trip.id,
+        label: trip.id,
+        description: `Aktif · ${route?.label ?? trip.routeId}`,
+      });
+    }
+
+    return [...activeTrips.values(), ...loadedTrips.filter((trip) => !activeTrips.has(trip.id))];
+  }, [routeOptions, selectedRouteIds, tripsQuery.data, vehicleSummaryQuery.data]);
   const operationalCounts = useMemo(
     () => ({
       total: vehicleSummaryQuery.data?.total ?? 0,
@@ -105,8 +125,13 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
       ? selectedMapVehicleId
       : null;
 
-  const pageCount = Math.max(1, Math.ceil(totalVehicles / pageSize));
-  const currentPage = Math.min(page, pageCount);
+  const hasVehicleApiFilters = selectedRouteIds.length > 0 || selectedTripIds.length > 0;
+  const displayedTotal = hasVehicleApiFilters ? (vehiclesQuery.data?.total ?? null) : totalVehicles;
+  const pageCount =
+    displayedTotal === null
+      ? (vehiclesQuery.data?.pageCount ?? null)
+      : Math.max(1, Math.ceil(displayedTotal / pageSize));
+  const currentPage = pageCount === null ? page : Math.min(page, pageCount);
   const visibleVehicles = filteredVehicles;
   const hasActiveFilters =
     query.trim().length > 0 ||
@@ -115,10 +140,10 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
     selectedTripIds.length > 0;
   const mapVehicleCount = hasActiveFilters ? filteredVehicles.length : totalVehicles;
 
-  const requestError = getFriendlyErrorMessage(
-    vehiclesQuery.error ?? vehicleSummaryQuery.error,
-    'armada',
-  );
+  const requestError =
+    vehiclesQuery.error?.message ??
+    vehicleSummaryQuery.error?.message ??
+    'Data armada gagal dimuat. Coba lagi beberapa saat.';
   const lastUpdatedLabel = vehiclesQuery.dataUpdatedAt
     ? new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(
         new Date(vehiclesQuery.dataUpdatedAt),
@@ -140,13 +165,11 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
           selectedRouteIds={selectedRouteIds}
           selectedTripIds={selectedTripIds}
           routesLoading={routesQuery.isPending}
-          routesError={
-            routesQuery.isError ? getFriendlyErrorMessage(routesQuery.error, 'rute') : null
-          }
+          routesError={routesQuery.isError ? routesQuery.error.message : null}
           routesHasNextPage={routesQuery.hasNextPage}
           routesFetchingNextPage={routesQuery.isFetchingNextPage}
           tripsLoading={tripsQuery.isPending}
-          tripsError={tripsQuery.isError ? getFriendlyErrorMessage(tripsQuery.error, 'trip') : null}
+          tripsError={tripsQuery.isError ? tripsQuery.error.message : null}
           tripsHasNextPage={tripsQuery.hasNextPage}
           tripsFetchingNextPage={tripsQuery.isFetchingNextPage}
           operationalCounts={operationalCounts}
@@ -163,7 +186,10 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
             setSelectedRouteIds(routeOptions.map((route) => route.id));
           }}
           onSelectLoadedTrips={() => {
-            setSelectedTripIds(tripOptions.map((trip) => trip.id));
+            // The selected routes already scope this view. Selecting every loaded
+            // scheduled trip would send hundreds of IDs and can exclude live
+            // vehicles whose current trip is not in the loaded option pages.
+            setSelectedTripIds([]);
           }}
           onStatusChange={(status) => {
             setStatusFilter(status);
@@ -290,10 +316,25 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
 
           {!vehiclesQuery.isPending && hasVehicleData && vehicles.length === 0 && (
             <div className='rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center'>
-              <p className='font-semibold text-slate-700'>Tidak ada kendaraan aktif</p>
-              <p className='mt-1 text-sm text-slate-500'>
-                API MBTA belum mengembalikan data kendaraan.
+              <p className='font-semibold text-slate-700'>
+                {selectedTripIds.length > 0
+                  ? 'Tidak ada kendaraan pada trip terpilih'
+                  : 'Tidak ada kendaraan aktif'}
               </p>
+              <p className='mt-1 text-sm text-slate-500'>
+                {selectedTripIds.length > 0
+                  ? 'Trip yang dipilih mungkin tidak sedang beroperasi. Hapus filter trip untuk melihat kendaraan pada rute terpilih.'
+                  : 'API MBTA belum mengembalikan data kendaraan.'}
+              </p>
+              {selectedTripIds.length > 0 && (
+                <button
+                  className='mt-4 rounded-lg bg-tj-blue px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800'
+                  onClick={() => setSelectedTripIds([])}
+                  type='button'
+                >
+                  Tampilkan semua trip di rute
+                </button>
+              )}
             </div>
           )}
 
@@ -328,7 +369,8 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
                   page={currentPage}
                   pageCount={pageCount}
                   pageSize={pageSize}
-                  total={totalVehicles}
+                  total={displayedTotal}
+                  hasNext={vehiclesQuery.data?.hasNext ?? false}
                   onPageChange={setPage}
                   onPageSizeChange={(size) => {
                     setPageSize(size);

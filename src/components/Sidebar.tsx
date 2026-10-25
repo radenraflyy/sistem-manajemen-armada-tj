@@ -140,6 +140,7 @@ const Sidebar = ({
             placeholder='Semua trip'
             options={trips}
             selectedIds={selectedTripIds}
+            selectLoadedLabel='Semua trip di rute'
             onToggle={onTripToggle}
             onSelectLoaded={onSelectLoadedTrips}
             onClear={onClearTrips}
