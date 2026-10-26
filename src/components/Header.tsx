@@ -3,9 +3,9 @@ import { Link, NavLink } from 'react-router';
 import LogoBrand from './LogoBrand';
 
 const navigationItems = [
-  { label: 'Vehicles', to: '/vehicle' },
-  { label: 'Routes', to: '/routes' },
-  { label: 'Trips', to: '/trips' },
+  { label: 'Kendaraan', to: '/vehicle' },
+  { label: 'Rute', to: '/routes' },
+  { label: 'Trip', to: '/trips' },
 ];
 
 const Header = () => {

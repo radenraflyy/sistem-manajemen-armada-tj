@@ -186,9 +186,6 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
             setSelectedRouteIds(routeOptions.map((route) => route.id));
           }}
           onSelectLoadedTrips={() => {
-            // The selected routes already scope this view. Selecting every loaded
-            // scheduled trip would send hundreds of IDs and can exclude live
-            // vehicles whose current trip is not in the loaded option pages.
             setSelectedTripIds([]);
           }}
           onStatusChange={(status) => {

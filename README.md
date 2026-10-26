@@ -14,22 +14,33 @@ Dashboard untuk memantau kendaraan, rute, dan trip secara real-time melalui peta
 - **ESLint** dan **Prettier** untuk pemeriksaan kode dan format.
 - **Husky** dan **lint-staged** untuk menjalankan pemeriksaan otomatis pada Git hooks.
 
+## API yang digunakan
+
+Aplikasi mengambil data armada, rute, dan trip dari **MBTA V3 API** (`https://api-v3.mbta.com`). Request dilakukan menggunakan Axios melalui endpoint `GET`, lalu TanStack React Query mengelola cache, status loading/error, pagination, dan pembaruan berkala.
+
+Alamat dasar API dapat diubah melalui variabel lingkungan `VITE_API_BASE_URL`. Jika variabel ini tidak diatur, aplikasi memakai alamat MBTA V3 API di atas. Contoh pengaturan ada di file `.env.example`.
+
 ## Menjalankan aplikasi
 
-Persyaratan: Node.js yang kompatibel dengan Vite 8 dan Yarn Classic.
+Ikuti langkah berikut untuk menjalankan aplikasi dari awal. Pastikan **Git**, **Node.js** yang kompatibel dengan Vite 8, dan **Yarn Classic (v1)** sudah terpasang.
 
 ```bash
+git clone https://github.com/radenraflyy/sistem-manajemen-armada-tj.git
+cd sistem-manajemen-armada-tj
+cp .env.example .env
 yarn install
 yarn dev
 ```
 
-Buka URL development yang ditampilkan Vite, biasanya `http://localhost:5173`.
+Setelah Vite berjalan, buka URL yang ditampilkan di terminal, biasanya `http://localhost:5173`.
 
-Aplikasi menggunakan `https://api-v3.mbta.com` secara default. Jika perlu mengganti alamat API, buat file `.env.local` di root project:
+File `.env` hasil salinan sudah cukup untuk menjalankan aplikasi. Secara default aplikasi menggunakan `https://api-v3.mbta.com`. Jika ingin memakai alamat API lain, ubah nilai `VITE_API_BASE_URL` di `.env`:
 
 ```env
-VITE_API_BASE_URL=https://api-v3.mbta.com
+VITE_API_BASE_URL=https://alamat-api-anda
 ```
+
+Simpan file tersebut, lalu jalankan ulang development server agar perubahan konfigurasi diterapkan.
 
 ## Halaman aplikasi
 
