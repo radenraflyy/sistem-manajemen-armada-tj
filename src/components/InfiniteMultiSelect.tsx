@@ -7,6 +7,7 @@ export type MultiSelectOption = {
   id: string;
   label: string;
   description?: string;
+  color?: string | null;
 };
 
 type InfiniteMultiSelectProps = {
@@ -98,14 +99,14 @@ const InfiniteMultiSelect = ({
       <span className='mb-2 block text-sm font-semibold text-slate-700'>{label}</span>
       <button
         aria-expanded={isOpen}
-        className='flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 text-left text-sm text-slate-600 outline-none transition hover:border-blue-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400'
+        className='flex h-12 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 text-left text-sm text-slate-700 outline-none transition hover:border-blue-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400'
         disabled={disabled}
         onClick={() => setOpen((current) => !current)}
         type='button'
       >
         <span className='truncate'>{selectedLabel}</span>
         <span aria-hidden='true' className='text-xs'>
-          ⌄
+          {isOpen ? '⌃' : '⌄'}
         </span>
       </button>
 
@@ -126,7 +127,7 @@ const InfiniteMultiSelect = ({
         <div className='absolute z-30 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl'>
           <input
             aria-label={`Cari ${label.toLocaleLowerCase()}`}
-            className='h-9 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-400'
+            className='h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-400'
             onChange={(event) => setSearch(event.target.value)}
             placeholder={`Cari ${label.toLocaleLowerCase()}...`}
             type='search'
@@ -178,6 +179,13 @@ const InfiniteMultiSelect = ({
                   onChange={() => onToggle(option.id)}
                   type='checkbox'
                 />
+                {option.color && (
+                  <span
+                    aria-label={`Warna rute ${option.label}`}
+                    className='mt-0.5 size-4 shrink-0 rounded-full border border-black/10'
+                    style={{ backgroundColor: option.color }}
+                  />
+                )}
                 <span className='min-w-0'>
                   <span className='block truncate font-medium'>{option.label}</span>
                   {option.description && (

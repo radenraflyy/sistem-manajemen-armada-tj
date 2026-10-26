@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import type { DashboardView } from '@/components/DashboardToolbar';
 import { FLEET_API_PAGE_SIZE } from '@/constants/fleet';
@@ -106,6 +106,10 @@ export function useFleetPageData({
     vehicleSummaryQuery.error?.message ??
     'Data armada gagal dimuat. Coba lagi beberapa saat.';
   const lastUpdatedLabel = formatTime(vehiclesQuery.dataUpdatedAt);
+  const refreshFleetData = useCallback(
+    async () => Promise.all([vehiclesQuery.refetch(), vehicleSummaryQuery.refetch()]),
+    [vehicleSummaryQuery.refetch, vehiclesQuery.refetch],
+  );
   const hasVehicleApiFilters = selectedRouteIds.length > 0 || selectedTripIds.length > 0;
   const displayedTotal = hasVehicleApiFilters ? (vehiclesQuery.data?.total ?? null) : totalVehicles;
   const hasActiveFilters =
@@ -125,6 +129,7 @@ export function useFleetPageData({
     mapVehicleCount,
     operationalCounts,
     requestError,
+    refreshFleetData,
     routeOptions,
     routesQuery,
     tripOptions,

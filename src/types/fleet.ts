@@ -51,6 +51,7 @@ export type RouteOption = {
   label: string;
   shortName: string;
   longName: string;
+  color: string | null;
 };
 
 export type TripOption = {

@@ -48,6 +48,7 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
     mapVehicleCount,
     operationalCounts,
     requestError,
+    refreshFleetData,
     routeOptions,
     routesQuery,
     tripOptions,
@@ -84,6 +85,7 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
       : null;
 
   const visibleVehicles = filteredVehicles;
+  const isRefreshing = vehiclesQuery.isFetching || vehicleSummaryQuery.isFetching;
 
   return (
     <>
@@ -93,8 +95,9 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
         <Sidebar
           routes={routeOptions.map((route) => ({
             id: route.id,
-            label: route.label,
-            description: route.longName || undefined,
+            label: route.longName || route.label,
+            description: `ID: ${route.shortName || route.id}`,
+            color: route.color,
           }))}
           trips={tripOptions}
           selectedRouteIds={selectedRouteIds}
@@ -111,9 +114,7 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
           statusFilter={statusFilter}
           tripsDisabled={selectedRouteIds.length === 0}
           onReset={resetFilters}
-          onClearRoutes={() => {
-            setSelectedRouteIds([]);
-          }}
+          onClearRoutes={() => setSelectedRouteIds([])}
           onClearTrips={() => {
             setSelectedTripIds([]);
           }}
@@ -157,49 +158,42 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
             onViewChange={setView}
           />
 
-          {view !== 'map' && (
-            <div className='mb-4 mt-6 flex flex-wrap items-end justify-between gap-3'>
-              <span
-                aria-live='polite'
-                className={`inline-flex items-center gap-2 text-xs font-medium ${
-                  vehiclesQuery.isError ? 'text-amber-700' : 'text-slate-500'
-                }`}
+          <div className='mb-4 mt-6 flex flex-wrap items-end justify-between gap-3'>
+            <div
+              aria-live='polite'
+              className={`inline-flex items-center gap-2 text-xs font-medium ${
+                vehiclesQuery.isError ? 'text-amber-700' : 'text-slate-500'
+              }`}
+            >
+              <button
+                aria-label={isRefreshing ? 'Sedang memperbarui data' : 'Perbarui data sekarang'}
+                className='rounded-full p-1 transition hover:bg-slate-200 disabled:cursor-not-allowed'
+                disabled={isRefreshing}
+                onClick={() => void refreshFleetData()}
+                title='Perbarui data sekarang'
+                type='button'
               >
-                {vehiclesQuery.isFetching ? (
-                  <LoadingIndicator
-                    className='text-inherit'
-                    label='Memperbarui data...'
-                    size='small'
-                  />
-                ) : (
-                  <>
-                    <svg
-                      aria-hidden='true'
-                      className='size-4'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth='1.7'
-                      viewBox='0 0 24 24'
-                    >
-                      {vehiclesQuery.isError ? (
-                        <path d='M12 9v4m0 4h.01M10.3 3.9 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3l-7.5-13.1a2 2 0 0 0-3.4 0Z' />
-                      ) : (
-                        <>
-                          <path d='M20 7v5h-5M4 17v-5h5' />
-                          <path d='M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2' />
-                        </>
-                      )}
-                    </svg>
-                    {vehiclesQuery.isError
-                      ? `Pembaruan gagal${lastUpdatedLabel ? ` · data ${lastUpdatedLabel}` : ''}`
-                      : lastUpdatedLabel
-                        ? `Terakhir diperbarui ${lastUpdatedLabel}`
-                        : 'Menunggu data'}
-                  </>
-                )}
-              </span>
+                <svg
+                  aria-hidden='true'
+                  className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`}
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.7'
+                  viewBox='0 0 24 24'
+                >
+                  <path d='M20 7v5h-5M4 17v-5h5' />
+                  <path d='M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2' />
+                </svg>
+              </button>
+              {isRefreshing
+                ? 'Memperbarui data...'
+                : vehiclesQuery.isError
+                  ? `Pembaruan gagal${lastUpdatedLabel ? ` · data ${lastUpdatedLabel}` : ''}`
+                  : lastUpdatedLabel
+                    ? `Terakhir diperbarui ${lastUpdatedLabel}`
+                    : 'Menunggu data'}
             </div>
-          )}
+          </div>
 
           {(vehiclesQuery.isError || vehicleSummaryQuery.isError) && hasVehicleData && (
             <div

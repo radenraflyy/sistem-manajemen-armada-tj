@@ -119,8 +119,8 @@ const Sidebar = ({
       <section className='mt-6 space-y-5 border-t border-slate-100 pt-5'>
         <div>
           <InfiniteMultiSelect
-            label='Rute / koridor'
-            placeholder='Semua rute'
+            label='Rute'
+            placeholder='Pilih satu atau beberapa rute'
             options={routes}
             selectedIds={selectedRouteIds}
             onToggle={onRouteToggle}

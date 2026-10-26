@@ -27,6 +27,7 @@ async function getRoutesPage(
       query: {
         'page[limit]': limit,
         'page[offset]': offset,
+        'fields[route]': 'short_name,long_name,color',
         sort: 'short_name',
       },
     },
@@ -35,11 +36,13 @@ async function getRoutesPage(
   const items = page.data.map((route) => {
     const attributes = route.attributes ?? {};
     const shortName = getString(attributes.short_name) ?? '';
+    const rawColor = getString(attributes.color);
     return {
       id: route.id,
       shortName,
       label: shortName || getString(attributes.long_name) || route.id,
       longName: getString(attributes.long_name) ?? '',
+      color: rawColor && /^[\da-f]{6}$/i.test(rawColor) ? `#${rawColor}` : null,
     };
   });
 

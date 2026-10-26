@@ -55,10 +55,11 @@ export function useFleetFilters(initialView: DashboardView) {
   const toggleRoute = useCallback(
     (routeId: string) => {
       const currentIds = parseIdList(searchParams.get('routes'));
-      const nextIds = currentIds.includes(routeId)
-        ? currentIds.filter((id) => id !== routeId)
-        : [...currentIds, routeId];
-      setSelectedRouteIds(nextIds);
+      setSelectedRouteIds(
+        currentIds.includes(routeId)
+          ? currentIds.filter((id) => id !== routeId)
+          : [...currentIds, routeId],
+      );
     },
     [searchParams, setSelectedRouteIds],
   );
