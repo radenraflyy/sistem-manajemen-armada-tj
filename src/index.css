@@ -11,6 +11,16 @@
   --color-tj-border: #dce3eb;
 }
 
+@layer base {
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
 @keyframes skeleton-shimmer {
   to {
     background-position: -200% 0;
