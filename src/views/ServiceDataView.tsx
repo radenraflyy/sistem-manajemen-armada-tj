@@ -1,11 +1,13 @@
 import ErrorState from '@/components/ErrorState';
 import LoadingIndicator from '@/components/LoadingIndicator';
 import Pagination from '@/components/Pagination';
+import { useTablePagination } from '@/components/pagination/useTablePagination';
 import ServiceDataTable from '@/components/service-data/ServiceDataTable';
 import ServiceDataToolbar from '@/components/service-data/ServiceDataToolbar';
 import { useServiceDataFilters } from '@/hooks/service-data/useServiceDataFilters';
 import { useServiceDataPageData } from '@/hooks/service-data/useServiceDataPageData';
 import { useDebouncedSearch } from '@/hooks/useDebouncedSearch';
+import { formatNumber } from '@/utils/formatters';
 
 type SectionPageProps = {
   kind: 'routes' | 'trips';
@@ -29,14 +31,14 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
   } = useServiceDataFilters();
   const [searchInput, setSearchInput] = useDebouncedSearch(search, setSearch);
   const {
-    canGoNext,
     displayTotal,
     error,
     filteredRows,
     filteredTripRows,
     isLoading,
     isRoutes,
-    pageCount,
+    hasNextPage,
+    paginationTotal,
     retry,
     routeOptions,
     routeOptionsQuery,
@@ -46,6 +48,14 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
     vehicleSummaryQuery,
     visibleRouteRows,
   } = useServiceDataPageData({ kind, page, pageSize, search, routeGroup, selectedRouteIds });
+  const { paginationProps } = useTablePagination({
+    page,
+    pageSize,
+    count: paginationTotal,
+    hasNext: hasNextPage,
+    onPageChange: setPage,
+    onRowsPerPageChange: setPageSize,
+  });
 
   const retryMessage = error?.message ?? `Data ${isRoutes ? 'rute' : 'trip'} gagal dimuat.`;
 
@@ -54,7 +64,9 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
       <div className='mb-5 flex flex-wrap items-end justify-between gap-4'>
         <div className='rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm shadow-sm'>
           <span className='font-bold text-slate-800'>
-            {displayTotal?.toLocaleString('id-ID') ?? tripRows.length}
+            {displayTotal === null || displayTotal === undefined
+              ? formatNumber(tripRows.length)
+              : formatNumber(displayTotal)}
           </span>
           <span className='ml-2 text-slate-500'>
             {displayTotal === null || displayTotal === undefined
@@ -104,15 +116,7 @@ const ServiceDataView = ({ kind }: SectionPageProps) => {
               routeTripCounts={routeTripCounts}
               isEmpty={filteredRows.length === 0}
             />
-            <Pagination
-              page={page}
-              pageCount={pageCount}
-              pageSize={pageSize}
-              total={displayTotal ?? null}
-              hasNext={canGoNext}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-            />
+            <Pagination {...paginationProps} />
           </>
         )}
       </section>

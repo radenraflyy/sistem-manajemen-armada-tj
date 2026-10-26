@@ -16,6 +16,7 @@ import {
 } from '@/services/mbtaApi';
 import { vehicleQueryKeys } from '@/services/queryKeys';
 import type { Vehicle, VehicleSummary } from '@/types/fleet';
+import { formatFixed } from '@/utils/formatters';
 
 export type { VehicleSummary } from '@/types/fleet';
 
@@ -100,7 +101,7 @@ function mapVehicle(
     occupancyStatus,
     coordinates:
       latitude !== null && longitude !== null
-        ? `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
+        ? `${formatFixed(latitude, 5)}, ${formatFixed(longitude, 5)}`
         : 'Koordinat tidak tersedia',
     latitude,
     longitude,

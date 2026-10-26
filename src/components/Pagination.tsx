@@ -1,3 +1,5 @@
+import { formatNumber } from '@/utils/formatters';
+
 type PaginationProps = {
   page: number;
   pageCount: number | null;
@@ -36,7 +38,7 @@ const Pagination = ({
         ) : (
           <>
             {' '}
-            dari <strong className='text-slate-700'>{total.toLocaleString('id-ID')}</strong> data
+            dari <strong className='text-slate-700'>{formatNumber(total)}</strong> data
           </>
         )}
       </span>

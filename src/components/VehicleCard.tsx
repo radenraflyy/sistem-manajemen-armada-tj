@@ -1,4 +1,5 @@
 import type { Vehicle } from '@/types/fleet';
+import { formatSpeedKph, formatTime } from '@/utils/formatters';
 
 type VehicleCardProps = {
   vehicle: Vehicle;
@@ -14,10 +15,8 @@ const statusStyles: Record<Vehicle['status'], string> = {
 
 const updatedLabel = (updatedAt: string | null) => {
   if (!updatedAt) return 'Waktu pembaruan tidak tersedia';
-  const date = new Date(updatedAt);
-  return Number.isNaN(date.getTime())
-    ? 'Waktu pembaruan tidak tersedia'
-    : `Diperbarui ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+  const time = formatTime(updatedAt);
+  return time ? `Diperbarui ${time}` : 'Waktu pembaruan tidak tersedia';
 };
 
 const VehicleCard = ({ vehicle, onDetails }: VehicleCardProps) => (
@@ -55,7 +54,7 @@ const VehicleCard = ({ vehicle, onDetails }: VehicleCardProps) => (
       <div className='px-2'>
         <p className='text-[10px] text-slate-400'>Kecepatan</p>
         <p className='mt-1 whitespace-nowrap text-xs font-semibold text-slate-700'>
-          {vehicle.speedKph === null ? '—' : `${vehicle.speedKph.toFixed(1)} km/jam`}
+          {formatSpeedKph(vehicle.speedKph, '—')}
         </p>
       </div>
       <div className='px-2'>

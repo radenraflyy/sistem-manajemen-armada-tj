@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 
 import LoadingIndicator from '@/components/LoadingIndicator';
 import type { Vehicle } from '@/types/fleet';
+import { formatDateTime, formatFixed, formatSpeedKph } from '@/utils/formatters';
 
 const InteractiveMap = lazy(() => import('@/components/InteractiveMap'));
 
@@ -25,11 +26,7 @@ const VehicleDetailModal = ({ vehicle, onClose }: { vehicle: Vehicle; onClose: (
     vehicle.latitude !== null && vehicle.longitude !== null
       ? `https://www.openstreetmap.org/?mlat=${vehicle.latitude}&mlon=${vehicle.longitude}#map=16/${vehicle.latitude}/${vehicle.longitude}`
       : null;
-  const updatedAt = vehicle.updatedAt ? new Date(vehicle.updatedAt) : null;
-  const updatedAtLabel =
-    updatedAt && !Number.isNaN(updatedAt.getTime())
-      ? updatedAt.toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'medium' })
-      : 'Tidak tersedia';
+  const updatedAtLabel = formatDateTime(vehicle.updatedAt) ?? 'Tidak tersedia';
   const routeDirectionLabel = vehicle.routeDetails.directionDestinations.join(' / ');
   const routeDirectionNames = vehicle.routeDetails.directionNames.join(' / ');
   const accessibilityLabel = (value: number | null) =>
@@ -42,12 +39,9 @@ const VehicleDetailModal = ({ vehicle, onClose }: { vehicle: Vehicle; onClose: (
         ['ID kendaraan', vehicle.id],
         ['Status saat ini', vehicle.currentStatus ?? 'Tidak tersedia'],
         ['Status', vehicle.status],
-        ['Latitude', vehicle.latitude?.toFixed(6) ?? 'Tidak tersedia'],
-        ['Longitude', vehicle.longitude?.toFixed(6) ?? 'Tidak tersedia'],
-        [
-          'Kecepatan',
-          vehicle.speedKph === null ? 'Tidak tersedia' : `${vehicle.speedKph.toFixed(1)} km/jam`,
-        ],
+        ['Latitude', formatFixed(vehicle.latitude, 6) ?? 'Tidak tersedia'],
+        ['Longitude', formatFixed(vehicle.longitude, 6) ?? 'Tidak tersedia'],
+        ['Kecepatan', formatSpeedKph(vehicle.speedKph, 'Tidak tersedia')],
         ['Arah kendaraan', vehicle.bearing === null ? 'Tidak tersedia' : `${vehicle.bearing}°`],
         ['Urutan halte berikutnya', vehicle.currentStopSequence?.toString() ?? 'Tidak tersedia'],
         ['ID halte saat ini', vehicle.stopId ?? 'Tidak tersedia'],

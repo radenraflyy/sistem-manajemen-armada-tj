@@ -7,6 +7,7 @@ import LoadingIndicator from '@/components/LoadingIndicator';
 import Pagination from '@/components/Pagination';
 import Sidebar from '@/components/Sidebar';
 import VehicleDetailModal from '@/components/VehicleDetailModal';
+import { useTablePagination } from '@/components/pagination/useTablePagination';
 import VehicleGrid from '@/components/vehicles/VehicleGrid';
 import VehicleGridSkeleton from '@/components/vehicles/VehicleGridSkeleton';
 import VehicleMapPane from '@/components/vehicles/VehicleMapPane';
@@ -38,14 +39,14 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
   } = useFleetFilters(initialView);
   const [searchInput, setSearchInput] = useDebouncedSearch(query, setQuery);
   const {
-    currentPage,
     displayedTotal,
+    fallbackPageCount,
     filteredVehicles,
+    hasNextPage,
     hasVehicleData,
     lastUpdatedLabel,
     mapVehicleCount,
     operationalCounts,
-    pageCount,
     requestError,
     routeOptions,
     routesQuery,
@@ -62,6 +63,15 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
     statusFilter,
     selectedRouteIds,
     selectedTripIds,
+  });
+  const { paginationProps } = useTablePagination({
+    page,
+    pageSize,
+    count: displayedTotal,
+    fallbackPageCount,
+    hasNext: hasNextPage,
+    onPageChange: setPage,
+    onRowsPerPageChange: setPageSize,
   });
 
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -286,19 +296,7 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
                 />
               )}
 
-              {view !== 'map' && (
-                <Pagination
-                  page={currentPage}
-                  pageCount={pageCount}
-                  pageSize={pageSize}
-                  total={displayedTotal}
-                  hasNext={vehiclesQuery.data?.hasNext ?? false}
-                  onPageChange={setPage}
-                  onPageSizeChange={(size) => {
-                    setPageSize(size);
-                  }}
-                />
-              )}
+              {view !== 'map' && <Pagination {...paginationProps} />}
             </>
           )}
         </main>

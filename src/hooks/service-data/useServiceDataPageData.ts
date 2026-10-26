@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 
 import { FLEET_API_PAGE_SIZE, FLEET_QUERY_STALE_TIME } from '@/constants/fleet';
-import { usePaginationMeta } from '@/hooks/shared/usePaginationMeta';
 import {
   useRouteIdsQuery,
   useRoutesInfiniteQuery,
@@ -86,9 +85,7 @@ export function useServiceDataPageData({
     );
   }, [search, tripRows]);
   const filteredRows = isRoutes ? filteredRouteRows : filteredTripRows;
-  const paginationTotal = isRoutes ? filteredRouteRows.length : total;
-  const { pageCount } = usePaginationMeta({ page, pageSize, total: paginationTotal });
-  const canGoNext = isRoutes ? pageCount !== null && page < pageCount : hasNext;
+  const paginationTotal = isRoutes ? filteredRouteRows.length : (total ?? null);
   const displayTotal = isRoutes ? filteredRouteRows.length : total;
   const visibleRouteRows = filteredRouteRows.slice((page - 1) * pageSize, page * pageSize);
   const routeTripCounts = useQueries({
@@ -103,14 +100,14 @@ export function useServiceDataPageData({
 
   return {
     allRouteIdsQuery,
-    canGoNext,
     displayTotal,
     error,
     filteredRows,
     filteredTripRows,
     isLoading,
     isRoutes,
-    pageCount,
+    hasNextPage: hasNext,
+    paginationTotal,
     retry,
     routeOptions,
     routeOptionsQuery,

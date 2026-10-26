@@ -1,5 +1,6 @@
 import DataTable, { type DataTableColumn } from '@/components/DataTable';
 import type { Vehicle, VehicleStatus } from '@/types/fleet';
+import { formatSpeedKph } from '@/utils/formatters';
 
 type VehicleTableProps = {
   vehicles: Vehicle[];
@@ -53,8 +54,7 @@ const VehicleTable = ({ vehicles, onDetails }: VehicleTableProps) => {
     {
       key: 'speed',
       header: 'Kecepatan',
-      cell: (vehicle) =>
-        vehicle.speedKph === null ? '—' : `${vehicle.speedKph.toFixed(1)} km/jam`,
+      cell: (vehicle) => formatSpeedKph(vehicle.speedKph, '—'),
     },
     { key: 'occupancy', header: 'Kapasitas', cell: (vehicle) => vehicle.occupancy },
     {

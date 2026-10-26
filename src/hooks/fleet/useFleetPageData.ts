@@ -2,12 +2,12 @@ import { useMemo } from 'react';
 
 import type { DashboardView } from '@/components/DashboardToolbar';
 import { FLEET_API_PAGE_SIZE } from '@/constants/fleet';
-import { usePaginationMeta } from '@/hooks/shared/usePaginationMeta';
 import { useRoutesInfiniteQuery } from '@/services/routes-vehicle';
 import { useTripsInfiniteQuery } from '@/services/trips';
 import { useVehicleSummaryQuery, useVehiclesQuery } from '@/services/vehicles';
 import type { Vehicle, VehicleStatus } from '@/types/fleet';
 import { filterVehicles } from '@/utils/filterVehicles';
+import { formatTime } from '@/utils/formatters';
 
 const EMPTY_VEHICLES: Vehicle[] = [];
 
@@ -105,19 +105,9 @@ export function useFleetPageData({
     vehiclesQuery.error?.message ??
     vehicleSummaryQuery.error?.message ??
     'Data armada gagal dimuat. Coba lagi beberapa saat.';
-  const lastUpdatedLabel = vehiclesQuery.dataUpdatedAt
-    ? new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(
-        new Date(vehiclesQuery.dataUpdatedAt),
-      )
-    : null;
+  const lastUpdatedLabel = formatTime(vehiclesQuery.dataUpdatedAt);
   const hasVehicleApiFilters = selectedRouteIds.length > 0 || selectedTripIds.length > 0;
   const displayedTotal = hasVehicleApiFilters ? (vehiclesQuery.data?.total ?? null) : totalVehicles;
-  const { currentPage, pageCount } = usePaginationMeta({
-    page,
-    pageSize,
-    total: displayedTotal,
-    fallbackPageCount: vehiclesQuery.data?.pageCount,
-  });
   const hasActiveFilters =
     query.trim().length > 0 ||
     statusFilter !== 'Semua' ||
@@ -126,14 +116,14 @@ export function useFleetPageData({
   const mapVehicleCount = hasActiveFilters ? filteredVehicles.length : totalVehicles;
 
   return {
-    currentPage,
     displayedTotal,
+    fallbackPageCount: vehiclesQuery.data?.pageCount ?? null,
     filteredVehicles,
+    hasNextPage: vehiclesQuery.data?.hasNext ?? false,
     hasVehicleData,
     lastUpdatedLabel,
     mapVehicleCount,
     operationalCounts,
-    pageCount,
     requestError,
     routeOptions,
     routesQuery,
