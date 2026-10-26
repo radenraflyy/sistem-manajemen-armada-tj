@@ -1,6 +1,6 @@
 import type { Key, ReactNode } from 'react';
 
-import Table from './Table';
+import Table from '@/components/Table';
 
 export type DataTableColumn<Row> = {
   key: string;

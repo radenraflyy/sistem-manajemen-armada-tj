@@ -57,7 +57,7 @@ const Pagination = ({
           </select>
         </label>
         <button
-          className='h-9 rounded-lg border border-slate-200 px-3 font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40'
+          className='h-9 cursor-pointer rounded-lg border border-slate-200 px-3 font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40'
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
           type='button'
@@ -74,7 +74,7 @@ const Pagination = ({
           )}
         </span>
         <button
-          className='h-9 rounded-lg border border-slate-200 px-3 font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40'
+          className='h-9 cursor-pointer rounded-lg border border-slate-200 px-3 font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40'
           disabled={pageCount === null ? !hasNext : page >= pageCount}
           onClick={() => onPageChange(page + 1)}
           type='button'

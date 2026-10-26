@@ -7,16 +7,15 @@ import {
 } from '@/constants/fleet';
 import { requestApiData } from '@/data-service/apiClient';
 import useQueryApiRequest from '@/hooks/useApiRequest/useQueryApiRequest';
-import type { Vehicle, VehicleSummary } from '@/types/fleet';
-
 import {
   type MbtaResource,
   getNumber,
   getString,
   isRecord,
   parseVehiclesResponse,
-} from '../mbtaApi';
-import { vehicleQueryKeys } from '../queryKeys';
+} from '@/services/mbtaApi';
+import { vehicleQueryKeys } from '@/services/queryKeys';
+import type { Vehicle, VehicleSummary } from '@/types/fleet';
 
 export type { VehicleSummary } from '@/types/fleet';
 

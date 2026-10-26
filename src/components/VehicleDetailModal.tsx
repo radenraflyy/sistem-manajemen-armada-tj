@@ -1,9 +1,9 @@
 import { Suspense, lazy, useEffect } from 'react';
 
-import type { Vehicle } from '../types/fleet';
-import LoadingIndicator from './LoadingIndicator';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import type { Vehicle } from '@/types/fleet';
 
-const InteractiveMap = lazy(() => import('./InteractiveMap'));
+const InteractiveMap = lazy(() => import('@/components/InteractiveMap'));
 
 const VehicleDetailModal = ({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) => {
   useEffect(() => {

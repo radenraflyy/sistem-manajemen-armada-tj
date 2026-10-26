@@ -1,6 +1,6 @@
-import { ROUTE_TYPE_LABELS } from '../../constants/routes-vehicle';
-import type { RouteRow } from '../../types/fleet';
-import type { DataTableColumn } from '../DataTable';
+import type { DataTableColumn } from '@/components/DataTable';
+import { ROUTE_TYPE_LABELS } from '@/constants/routes-vehicle';
+import type { RouteRow } from '@/types/fleet';
 
 type RouteTripCountQuery = {
   isPending: boolean;
@@ -28,21 +28,9 @@ export const routeTableColumns: DataTableColumn<RouteTableRow>[] = [
     ),
   },
   {
-    key: 'color',
-    header: 'Warna',
-    cell: ({ route }) =>
-      route.color ? (
-        <span className='inline-flex items-center gap-2 text-xs text-slate-600'>
-          <span
-            aria-label={`Warna ${route.color}`}
-            className='size-4 rounded-full border border-black/10'
-            style={{ backgroundColor: route.color }}
-          />
-          {route.color.toUpperCase()}
-        </span>
-      ) : (
-        '—'
-      ),
+    key: 'directions',
+    header: 'Arah layanan',
+    cell: ({ route }) => route.directionNames.join(' · ') || '—',
   },
   {
     key: 'vehicles',

@@ -1,7 +1,7 @@
-import type { RouteRow, TripRow } from '../../types/fleet';
-import DataTable from '../DataTable';
-import { type RouteTableRow, routeTableColumns } from './routeTableColumns';
-import { tripTableColumns } from './tripTableColumns';
+import DataTable from '@/components/DataTable';
+import { type RouteTableRow, routeTableColumns } from '@/components/service-data/routeTableColumns';
+import { tripTableColumns } from '@/components/service-data/tripTableColumns';
+import type { RouteRow, TripRow } from '@/types/fleet';
 
 type RouteTripCountQuery = {
   isPending: boolean;

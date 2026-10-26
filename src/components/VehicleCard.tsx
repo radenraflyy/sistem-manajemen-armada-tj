@@ -1,4 +1,4 @@
-import type { Vehicle } from '../types/fleet';
+import type { Vehicle } from '@/types/fleet';
 
 type VehicleCardProps = {
   vehicle: Vehicle;

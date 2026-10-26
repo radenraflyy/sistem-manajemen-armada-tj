@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router';
 
-import LogoBrand from './LogoBrand';
+import LogoBrand from '@/components/LogoBrand';
 
 const navigationItems = [
   { label: 'Kendaraan', to: '/vehicle' },

@@ -1,5 +1,5 @@
-import type { Vehicle } from '../../types/fleet';
-import VehicleCard from '../VehicleCard';
+import VehicleCard from '@/components/VehicleCard';
+import type { Vehicle } from '@/types/fleet';
 
 type VehicleGridProps = {
   vehicles: Vehicle[];

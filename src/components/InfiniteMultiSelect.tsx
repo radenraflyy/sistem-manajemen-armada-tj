@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useDebouncedValue } from '../hooks/useDebouncedSearch';
-import LoadingIndicator from './LoadingIndicator';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import { useDebouncedValue } from '@/hooks/useDebouncedSearch';
 
 export type MultiSelectOption = {
   id: string;

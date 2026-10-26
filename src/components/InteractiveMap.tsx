@@ -15,7 +15,7 @@ import {
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import type { Vehicle } from '../types/fleet';
+import type { Vehicle } from '@/types/fleet';
 
 const MIN_ZOOM = 9;
 const MAX_ZOOM = 18;

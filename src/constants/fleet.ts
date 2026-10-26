@@ -1,4 +1,4 @@
-import type { VehicleStatus } from '../types/fleet';
+import type { VehicleStatus } from '@/types/fleet';
 
 export const FLEET_API_PAGE_SIZE = 1000;
 export const FILTER_OPTIONS_PAGE_SIZE = 30;

@@ -7,10 +7,15 @@ import {
 } from '@/constants/fleet';
 import { requestApiData } from '@/data-service/apiClient';
 import useQueryApiRequest from '@/hooks/useApiRequest/useQueryApiRequest';
+import {
+  getNumber,
+  getPageTotal,
+  getString,
+  parsePage,
+  parseVehiclesResponse,
+} from '@/services/mbtaApi';
+import { routeQueryKeys } from '@/services/queryKeys';
 import type { RouteOption, RouteRow } from '@/types/fleet';
-
-import { getNumber, getPageTotal, getString, parsePage, parseVehiclesResponse } from '../mbtaApi';
-import { routeQueryKeys } from '../queryKeys';
 
 async function getRoutesPage(
   offset: number,

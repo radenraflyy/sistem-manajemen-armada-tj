@@ -1,5 +1,5 @@
-import type { VehicleStatus } from '../types/fleet';
-import InfiniteMultiSelect, { type MultiSelectOption } from './InfiniteMultiSelect';
+import InfiniteMultiSelect, { type MultiSelectOption } from '@/components/InfiniteMultiSelect';
+import type { VehicleStatus } from '@/types/fleet';
 
 type StatusFilter = 'Semua' | VehicleStatus;
 

@@ -1,4 +1,4 @@
-import LoadingIndicator from './LoadingIndicator';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 export type DashboardView = 'grid' | 'table' | 'map';
 

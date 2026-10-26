@@ -1,9 +1,9 @@
 import { Suspense, lazy } from 'react';
 
-import type { Vehicle, VehicleStatus } from '../../types/fleet';
-import LoadingIndicator from '../LoadingIndicator';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import type { Vehicle, VehicleStatus } from '@/types/fleet';
 
-const InteractiveMap = lazy(() => import('../InteractiveMap'));
+const InteractiveMap = lazy(() => import('@/components/InteractiveMap'));
 
 const statusStyles: Record<VehicleStatus, string> = {
   Berjalan: 'bg-blue-50 text-blue-700',

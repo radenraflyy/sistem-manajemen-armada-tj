@@ -1,7 +1,7 @@
-import { ROUTE_GROUPS, type RouteGroup } from '../../constants/routes-vehicle';
-import type { RouteOption, RouteRow } from '../../types/fleet';
-import { matchesRouteGroup } from '../../utils/routeGroups';
-import InfiniteMultiSelect from '../InfiniteMultiSelect';
+import InfiniteMultiSelect from '@/components/InfiniteMultiSelect';
+import { ROUTE_GROUPS, type RouteGroup } from '@/constants/routes-vehicle';
+import type { RouteOption, RouteRow } from '@/types/fleet';
+import { matchesRouteGroup } from '@/utils/routeGroups';
 
 type ServiceDataToolbarProps = {
   kind: 'routes' | 'trips';

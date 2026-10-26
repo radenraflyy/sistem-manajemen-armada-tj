@@ -1,5 +1,5 @@
-import type { TripRow } from '../../types/fleet';
-import type { DataTableColumn } from '../DataTable';
+import type { DataTableColumn } from '@/components/DataTable';
+import type { TripRow } from '@/types/fleet';
 
 export const tripTableColumns: DataTableColumn<TripRow>[] = [
   {

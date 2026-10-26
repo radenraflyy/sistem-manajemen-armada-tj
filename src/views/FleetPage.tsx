@@ -1,26 +1,20 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-import DashboardToolbar, { type DashboardView } from '../components/DashboardToolbar';
-import EmptyState from '../components/EmptyState';
-import ErrorState from '../components/ErrorState';
-import LoadingIndicator from '../components/LoadingIndicator';
-import Pagination from '../components/Pagination';
-import Sidebar from '../components/Sidebar';
-import VehicleDetailModal from '../components/VehicleDetailModal';
-import VehicleGrid from '../components/vehicles/VehicleGrid';
-import VehicleGridSkeleton from '../components/vehicles/VehicleGridSkeleton';
-import VehicleMapPane from '../components/vehicles/VehicleMapPane';
-import VehicleTable from '../components/vehicles/VehicleTable';
-import { FLEET_API_PAGE_SIZE } from '../constants/fleet';
-import { useDebouncedSearch } from '../hooks/useDebouncedSearch';
-import { useFleetFilters } from '../hooks/useFleetFilters';
-import { useRoutesInfiniteQuery } from '../services/routes-vehicle';
-import { useTripsInfiniteQuery } from '../services/trips';
-import { useVehicleSummaryQuery, useVehiclesQuery } from '../services/vehicles';
-import type { Vehicle } from '../types/fleet';
-import { filterVehicles } from '../utils/filterVehicles';
-
-const EMPTY_VEHICLES: Vehicle[] = [];
+import DashboardToolbar, { type DashboardView } from '@/components/DashboardToolbar';
+import EmptyState from '@/components/EmptyState';
+import ErrorState from '@/components/ErrorState';
+import LoadingIndicator from '@/components/LoadingIndicator';
+import Pagination from '@/components/Pagination';
+import Sidebar from '@/components/Sidebar';
+import VehicleDetailModal from '@/components/VehicleDetailModal';
+import VehicleGrid from '@/components/vehicles/VehicleGrid';
+import VehicleGridSkeleton from '@/components/vehicles/VehicleGridSkeleton';
+import VehicleMapPane from '@/components/vehicles/VehicleMapPane';
+import VehicleTable from '@/components/vehicles/VehicleTable';
+import { useFleetFilters } from '@/hooks/fleet/useFleetFilters';
+import { useFleetPageData } from '@/hooks/fleet/useFleetPageData';
+import { useDebouncedSearch } from '@/hooks/useDebouncedSearch';
+import type { Vehicle } from '@/types/fleet';
 
 function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {}) {
   const {
@@ -43,112 +37,43 @@ function FleetPage({ initialView = 'grid' }: { initialView?: DashboardView } = {
     view,
   } = useFleetFilters(initialView);
   const [searchInput, setSearchInput] = useDebouncedSearch(query, setQuery);
-  const vehiclesQuery = useVehiclesQuery(
-    view === 'map' ? 1 : page,
-    view === 'map' ? FLEET_API_PAGE_SIZE : pageSize,
+  const {
+    currentPage,
+    displayedTotal,
+    filteredVehicles,
+    hasVehicleData,
+    lastUpdatedLabel,
+    mapVehicleCount,
+    operationalCounts,
+    pageCount,
+    requestError,
+    routeOptions,
+    routesQuery,
+    tripOptions,
+    tripsQuery,
+    vehicleSummaryQuery,
+    vehicles,
+    vehiclesQuery,
+  } = useFleetPageData({
+    view,
+    page,
+    pageSize,
+    query,
+    statusFilter,
     selectedRouteIds,
     selectedTripIds,
-  );
-  const vehicleSummaryQuery = useVehicleSummaryQuery();
-  const routesQuery = useRoutesInfiniteQuery();
-  const vehicles = vehiclesQuery.data?.items ?? EMPTY_VEHICLES;
-  const totalVehicles = vehicleSummaryQuery.data?.total ?? 0;
-  const hasVehicleData = vehiclesQuery.data !== undefined;
-  const routeOptions = useMemo(() => {
-    const routes = routesQuery.data?.pages.flatMap((page) => page.items) ?? [];
-    const activeRouteIds = new Set(Object.keys(vehicleSummaryQuery.data?.vehiclesByRoute ?? {}));
-    return routes.toSorted(
-      (left, right) => Number(activeRouteIds.has(right.id)) - Number(activeRouteIds.has(left.id)),
-    );
-  }, [routesQuery.data, vehicleSummaryQuery.data?.vehiclesByRoute]);
-  const tripsQuery = useTripsInfiniteQuery(selectedRouteIds);
-  const tripOptions = useMemo(() => {
-    const loadedTrips =
-      tripsQuery.data?.pages.flatMap((page) =>
-        page.items.map((trip) => ({
-          id: trip.id,
-          label: trip.id,
-          description: [
-            trip.label.replace(trip.id, '').trim().replace(/^·\s*/, ''),
-            trip.routeId ? routeOptions.find((route) => route.id === trip.routeId)?.label : '',
-          ]
-            .filter(Boolean)
-            .join(' · '),
-        })),
-      ) ?? [];
-    const activeTrips = new Map<string, (typeof loadedTrips)[number]>();
-    for (const trip of vehicleSummaryQuery.data?.activeTrips ?? []) {
-      if (
-        activeTrips.has(trip.id) ||
-        (selectedRouteIds.length > 0 && !selectedRouteIds.includes(trip.routeId))
-      ) {
-        continue;
-      }
-      const route = routeOptions.find((option) => option.id === trip.routeId);
-      activeTrips.set(trip.id, {
-        id: trip.id,
-        label: trip.id,
-        description: `Aktif · ${route?.label ?? trip.routeId}`,
-      });
-    }
-
-    return [...activeTrips.values(), ...loadedTrips.filter((trip) => !activeTrips.has(trip.id))];
-  }, [routeOptions, selectedRouteIds, tripsQuery.data, vehicleSummaryQuery.data]);
-  const operationalCounts = useMemo(
-    () => ({
-      total: vehicleSummaryQuery.data?.total ?? 0,
-      moving: vehicleSummaryQuery.data?.moving ?? 0,
-      stopped: vehicleSummaryQuery.data?.stopped ?? 0,
-      approaching: vehicleSummaryQuery.data?.approaching ?? 0,
-      routes: vehicleSummaryQuery.data?.routes ?? 0,
-    }),
-    [vehicleSummaryQuery.data],
-  );
+  });
 
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [selectedMapVehicleId, setSelectedMapVehicleId] = useState<string | null>(null);
   const closeVehicleDialog = useCallback(() => setSelectedVehicle(null), []);
-
-  const filteredVehicles = useMemo(
-    () =>
-      filterVehicles(vehicles, {
-        query,
-        status: statusFilter,
-        routeIds: selectedRouteIds,
-        tripIds: selectedTripIds,
-      }),
-    [query, selectedRouteIds, selectedTripIds, statusFilter, vehicles],
-  );
 
   const activeSelectedMapVehicleId =
     selectedMapVehicleId && filteredVehicles.some((vehicle) => vehicle.id === selectedMapVehicleId)
       ? selectedMapVehicleId
       : null;
 
-  const hasVehicleApiFilters = selectedRouteIds.length > 0 || selectedTripIds.length > 0;
-  const displayedTotal = hasVehicleApiFilters ? (vehiclesQuery.data?.total ?? null) : totalVehicles;
-  const pageCount =
-    displayedTotal === null
-      ? (vehiclesQuery.data?.pageCount ?? null)
-      : Math.max(1, Math.ceil(displayedTotal / pageSize));
-  const currentPage = pageCount === null ? page : Math.min(page, pageCount);
   const visibleVehicles = filteredVehicles;
-  const hasActiveFilters =
-    query.trim().length > 0 ||
-    statusFilter !== 'Semua' ||
-    selectedRouteIds.length > 0 ||
-    selectedTripIds.length > 0;
-  const mapVehicleCount = hasActiveFilters ? filteredVehicles.length : totalVehicles;
-
-  const requestError =
-    vehiclesQuery.error?.message ??
-    vehicleSummaryQuery.error?.message ??
-    'Data armada gagal dimuat. Coba lagi beberapa saat.';
-  const lastUpdatedLabel = vehiclesQuery.dataUpdatedAt
-    ? new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(
-        new Date(vehiclesQuery.dataUpdatedAt),
-      )
-    : null;
 
   return (
     <>

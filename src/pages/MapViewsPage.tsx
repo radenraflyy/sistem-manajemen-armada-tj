@@ -1,4 +1,4 @@
-import FleetPage from '../views/FleetPage';
+import FleetPage from '@/views/FleetPage';
 
 const MapViewsPage = () => <FleetPage initialView='map' />;
 

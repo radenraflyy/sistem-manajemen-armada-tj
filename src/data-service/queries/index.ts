@@ -1,7 +1,7 @@
-import type { QueriesDataService } from '../../types/api';
-import { type RouteQueryKeys, routeQueries } from './routes-vehicle';
-import { type TripQueryKeys, tripQueries } from './trips';
-import { type VehicleQueryKeys, vehicleQueries } from './vehicles';
+import { type RouteQueryKeys, routeQueries } from '@/data-service/queries/routes-vehicle';
+import { type TripQueryKeys, tripQueries } from '@/data-service/queries/trips';
+import { type VehicleQueryKeys, vehicleQueries } from '@/data-service/queries/vehicles';
+import type { QueriesDataService } from '@/types/api';
 
 export type AllQueriesKeys = VehicleQueryKeys | RouteQueryKeys | TripQueryKeys;
 

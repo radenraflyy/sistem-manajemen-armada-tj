@@ -1,6 +1,6 @@
-import type { RouteGroup } from '../constants/routes-vehicle';
+import type { RouteGroup } from '@/constants/routes-vehicle';
 
-export type { RouteGroup } from '../constants/routes-vehicle';
+export type { RouteGroup } from '@/constants/routes-vehicle';
 
 type RouteGroupFields = {
   shortName: string;

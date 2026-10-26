@@ -1,5 +1,5 @@
-import type { Vehicle, VehicleStatus } from '../../types/fleet';
-import DataTable, { type DataTableColumn } from '../DataTable';
+import DataTable, { type DataTableColumn } from '@/components/DataTable';
+import type { Vehicle, VehicleStatus } from '@/types/fleet';
 
 type VehicleTableProps = {
   vehicles: Vehicle[];

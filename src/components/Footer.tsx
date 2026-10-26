@@ -1,4 +1,4 @@
-import LogoBrand from './LogoBrand';
+import LogoBrand from '@/components/LogoBrand';
 
 const Footer = () => {
   return (

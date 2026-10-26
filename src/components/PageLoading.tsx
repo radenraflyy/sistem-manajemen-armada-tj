@@ -1,4 +1,4 @@
-import LoadingIndicator from './LoadingIndicator';
+import LoadingIndicator from '@/components/LoadingIndicator';
 
 const PageLoading = () => (
   <main className='flex min-h-screen items-center justify-center bg-[#f4f7fb] font-pt-sans'>

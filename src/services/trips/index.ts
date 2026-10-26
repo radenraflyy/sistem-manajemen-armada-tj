@@ -3,10 +3,15 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { FILTER_OPTIONS_PAGE_SIZE, FLEET_QUERY_STALE_TIME } from '@/constants/fleet';
 import { requestApiData } from '@/data-service/apiClient';
 import useQueryApiRequest from '@/hooks/useApiRequest/useQueryApiRequest';
+import {
+  getNumber,
+  getPageTotal,
+  getString,
+  parsePage,
+  parseVehiclesResponse,
+} from '@/services/mbtaApi';
+import { tripQueryKeys } from '@/services/queryKeys';
 import type { TripOption, TripRow } from '@/types/fleet';
-
-import { getNumber, getPageTotal, getString, parsePage, parseVehiclesResponse } from '../mbtaApi';
-import { tripQueryKeys } from '../queryKeys';
 
 async function getTripsPage(
   routeIds: string[],

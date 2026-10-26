@@ -3,8 +3,7 @@ import { useCallback } from 'react';
 import axios, { type AxiosError } from 'axios';
 
 import type { SuccessResponse } from '@/types';
-
-import type { AxiosFetchParams, ResponsePayload } from './types';
+import type { AxiosFetchParams, ResponsePayload } from '@/utils/axiosInstance/types';
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api-v3.mbta.com',

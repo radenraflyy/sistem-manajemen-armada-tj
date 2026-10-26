@@ -1,4 +1,4 @@
-import type { Vehicle, VehicleStatus } from '../types/fleet';
+import type { Vehicle, VehicleStatus } from '@/types/fleet';
 
 export type VehicleFilters = {
   query: string;

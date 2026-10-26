@@ -1,4 +1,4 @@
-import ServiceDataView from '../views/ServiceDataView';
+import ServiceDataView from '@/views/ServiceDataView';
 
 const TripsPage = () => (
   <ServiceDataView

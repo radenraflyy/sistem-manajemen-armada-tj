@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { SEARCH_DEBOUNCE_MS } from '../constants/search';
+import { SEARCH_DEBOUNCE_MS } from '@/constants/search';
 
 export function useDebouncedSearch(
   value: string,
