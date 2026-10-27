@@ -108,7 +108,7 @@ export function useFleetPageData({
   const lastUpdatedLabel = formatTime(vehiclesQuery.dataUpdatedAt);
   const refreshFleetData = useCallback(
     async () => Promise.all([vehiclesQuery.refetch(), vehicleSummaryQuery.refetch()]),
-    [vehicleSummaryQuery.refetch, vehiclesQuery.refetch],
+    [vehicleSummaryQuery, vehiclesQuery],
   );
   const hasVehicleApiFilters = selectedRouteIds.length > 0 || selectedTripIds.length > 0;
   const displayedTotal = hasVehicleApiFilters ? (vehiclesQuery.data?.total ?? null) : totalVehicles;
