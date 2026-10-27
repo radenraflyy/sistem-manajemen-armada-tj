@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 
-import { type QueryKey, useInfiniteQuery } from '@tanstack/react-query';
+import {
+  type InfiniteData,
+  type QueryFunctionContext,
+  type QueryKey,
+  useInfiniteQuery,
+} from '@tanstack/react-query';
 
 import { type ApiRequestConfig, requestApiData } from '@/data-service/apiClient';
 import { type AllQueriesKeys } from '@/data-service/queries';
@@ -27,14 +32,15 @@ export default function useInfiniteQueryApiRequest<TPage, TPageParam>({
   staleTime,
 }: UseInfiniteQueryApiRequestProps<TPage, TPageParam>) {
   const fetchPage = useCallback(
-    async ({ pageParam }: { pageParam: TPageParam }) => {
-      const response = await requestApiData<unknown>({ key, config: config(pageParam) });
-      return transform(response, pageParam);
+    async ({ pageParam }: QueryFunctionContext<QueryKey, TPageParam>) => {
+      const typedPageParam = pageParam as TPageParam;
+      const response = await requestApiData<unknown>({ key, config: config(typedPageParam) });
+      return transform(response, typedPageParam);
     },
     [config, key, transform],
   );
 
-  return useInfiniteQuery({
+  return useInfiniteQuery<TPage, Error, InfiniteData<TPage, TPageParam>, QueryKey, TPageParam>({
     queryKey,
     queryFn: fetchPage,
     initialPageParam,
