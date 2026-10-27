@@ -8,7 +8,7 @@ import {
   useRoutesInfiniteQuery,
   useRoutesPageQuery,
 } from '@/services/routes-vehicle';
-import { getRouteTripCount, useTripsPageQuery } from '@/services/trips';
+import { routeTripCountQueryOptions, useTripsPageQuery } from '@/services/trips';
 import { useVehicleSummaryQuery } from '@/services/vehicles';
 import type { RouteRow, TripRow } from '@/types/fleet';
 import { matchesRouteGroup } from '@/utils/routeGroups';
@@ -91,8 +91,7 @@ export function useServiceDataPageData({
   const routeTripCounts = useQueries({
     queries: isRoutes
       ? visibleRouteRows.map((route) => ({
-          queryKey: ['routes', 'trip-count', route.id],
-          queryFn: () => getRouteTripCount(route.id),
+          ...routeTripCountQueryOptions(route.id),
           staleTime: FLEET_QUERY_STALE_TIME.routeOptions,
         }))
       : [],

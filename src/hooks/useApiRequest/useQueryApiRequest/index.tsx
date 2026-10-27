@@ -9,8 +9,21 @@ export interface UseQueryApiRequestProps<T> {
   key: AllQueriesKeys;
   config?: ApiRequestConfig;
   queryKey?: QueryKey;
-  queryFn?: () => Promise<T>;
+  transform?: (response: unknown) => T | Promise<T>;
   options?: Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>;
+}
+
+export function apiQueryOptions<T>({
+  key,
+  config,
+  transform,
+}: Pick<UseQueryApiRequestProps<T>, 'key' | 'config' | 'transform'>) {
+  return {
+    queryFn: async () => {
+      const response = await requestApiData<unknown>({ key, config });
+      return transform ? transform(response) : (response as T);
+    },
+  };
 }
 
 function useQueryApiRequest<T = unknown>({
@@ -18,14 +31,14 @@ function useQueryApiRequest<T = unknown>({
   options,
   config,
   queryKey,
-  queryFn,
+  transform,
 }: UseQueryApiRequestProps<T>) {
   const url = allQueries[key];
 
-  const fetchData = useCallback(
-    () => (queryFn ? queryFn() : requestApiData<T>({ key, config })),
-    [config, key, queryFn],
-  );
+  const fetchData = useCallback(async () => {
+    const response = await requestApiData<unknown>({ key, config });
+    return transform ? transform(response) : (response as T);
+  }, [config, key, transform]);
 
   const queryOptions: Partial<
     Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryKey' | 'queryFn'>

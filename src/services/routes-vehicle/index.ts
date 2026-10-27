@@ -1,11 +1,9 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-
 import {
   FILTER_OPTIONS_PAGE_SIZE,
   FLEET_API_PAGE_SIZE,
   FLEET_QUERY_STALE_TIME,
 } from '@/constants/fleet';
-import { requestApiData } from '@/data-service/apiClient';
+import useInfiniteQueryApiRequest from '@/hooks/useApiRequest/useInfiniteQueryApiRequest';
 import useQueryApiRequest from '@/hooks/useApiRequest/useQueryApiRequest';
 import {
   getNumber,
@@ -16,52 +14,6 @@ import {
 } from '@/services/mbtaApi';
 import { routeQueryKeys } from '@/services/queryKeys';
 import type { RouteOption, RouteRow } from '@/types/fleet';
-
-async function getRoutesPage(
-  offset: number,
-): Promise<{ items: RouteOption[]; nextOffset?: number }> {
-  const limit = FILTER_OPTIONS_PAGE_SIZE;
-  const payload = await requestApiData<unknown>({
-    key: 'routes',
-    config: {
-      query: {
-        'page[limit]': limit,
-        'page[offset]': offset,
-        'fields[route]': 'short_name,long_name,color',
-        sort: 'short_name',
-      },
-    },
-  });
-  const page = parsePage(payload, offset, limit);
-  const items = page.data.map((route) => {
-    const attributes = route.attributes ?? {};
-    const shortName = getString(attributes.short_name) ?? '';
-    const rawColor = getString(attributes.color);
-    return {
-      id: route.id,
-      shortName,
-      label: shortName || getString(attributes.long_name) || route.id,
-      longName: getString(attributes.long_name) ?? '',
-      color: rawColor && /^[\da-f]{6}$/i.test(rawColor) ? `#${rawColor}` : null,
-    };
-  });
-
-  return { items, nextOffset: page.nextOffset };
-}
-
-async function getAllRouteIds(): Promise<string[]> {
-  const payload = await requestApiData<unknown>({
-    key: 'routes',
-    config: {
-      query: {
-        'fields[route]': 'short_name',
-        'page[limit]': FLEET_API_PAGE_SIZE,
-        'page[offset]': 0,
-      },
-    },
-  });
-  return parseVehiclesResponse(payload).data.map((route) => route.id);
-}
 
 export function useRouteIdsQuery(enabled = true) {
   return useQueryApiRequest<string[]>({
@@ -74,7 +26,7 @@ export function useRouteIdsQuery(enabled = true) {
         'page[offset]': 0,
       },
     },
-    queryFn: getAllRouteIds,
+    transform: (response) => parseVehiclesResponse(response).data.map((route) => route.id),
     options: {
       enabled,
       staleTime: FLEET_QUERY_STALE_TIME.routeOptions,
@@ -93,11 +45,7 @@ export function useRoutesPageQuery(page: number, pageSize: number, enabled = tru
     key: 'routes',
     queryKey: routeQueryKeys.page(page, pageSize),
     config: { query: params },
-    queryFn: async () => {
-      const rawPayload = await requestApiData<unknown>({
-        key: 'routes',
-        config: { query: params },
-      });
+    transform: async (rawPayload) => {
       const payload = parseVehiclesResponse(rawPayload);
       const items = payload.data.map((route): RouteRow => {
         const attributes = route.attributes ?? {};
@@ -124,12 +72,36 @@ export function useRoutesPageQuery(page: number, pageSize: number, enabled = tru
 }
 
 export function useRoutesInfiniteQuery(enabled = true) {
-  return useInfiniteQuery({
+  return useInfiniteQueryApiRequest({
+    key: 'routes',
     queryKey: routeQueryKeys.options(),
-    queryFn: ({ pageParam }) => getRoutesPage(pageParam),
     initialPageParam: 0,
     enabled,
-    getNextPageParam: (lastPage) => lastPage.nextOffset,
     staleTime: FLEET_QUERY_STALE_TIME.routeOptions,
+    config: (offset: number) => ({
+      query: {
+        'page[limit]': FILTER_OPTIONS_PAGE_SIZE,
+        'page[offset]': offset,
+        'fields[route]': 'short_name,long_name,color',
+        sort: 'short_name',
+      },
+    }),
+    transform: (response, offset) => {
+      const page = parsePage(response, offset, FILTER_OPTIONS_PAGE_SIZE);
+      const items: RouteOption[] = page.data.map((route) => {
+        const attributes = route.attributes ?? {};
+        const shortName = getString(attributes.short_name) ?? '';
+        const rawColor = getString(attributes.color);
+        return {
+          id: route.id,
+          shortName,
+          label: shortName || getString(attributes.long_name) || route.id,
+          longName: getString(attributes.long_name) ?? '',
+          color: rawColor && /^[\da-f]{6}$/i.test(rawColor) ? `#${rawColor}` : null,
+        };
+      });
+      return { items, nextOffset: page.nextOffset };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
   });
 }

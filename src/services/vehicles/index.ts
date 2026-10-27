@@ -127,33 +127,6 @@ function mapVehicle(
   };
 }
 
-export async function getVehicles(
-  page: number,
-  pageSize: number,
-  routeIds: string[] = [],
-  tripIds: string[] = [],
-): Promise<{ items: Vehicle[]; hasNext: boolean; total: number | null; pageCount: number | null }> {
-  const offset = (page - 1) * pageSize;
-  const vehicleFilters =
-    tripIds.length > 0
-      ? { 'filter[trip]': tripIds.join(',') }
-      : routeIds.length > 0
-        ? { 'filter[route]': routeIds.join(',') }
-        : {};
-  const payload = await requestApiData<unknown>({
-    key: 'vehicles',
-    config: {
-      query: {
-        include: 'route,stop,trip,trip.shape',
-        'page[limit]': pageSize,
-        'page[offset]': offset,
-        ...vehicleFilters,
-      },
-    },
-  });
-  return mapVehiclesPayload(payload, pageSize, offset);
-}
-
 function mapVehiclesPayload(
   value: unknown,
   pageSize: number,
@@ -181,7 +154,7 @@ function mapVehiclesPayload(
   };
 }
 
-export async function getVehicleSummary(): Promise<VehicleSummary> {
+export async function getVehicleSummary(firstPayload: unknown): Promise<VehicleSummary> {
   const limit = FLEET_API_PAGE_SIZE;
   let offset = 0;
   let total = 0;
@@ -191,21 +164,10 @@ export async function getVehicleSummary(): Promise<VehicleSummary> {
   const routeIds = new Set<string>();
   const vehiclesByRoute: Record<string, number> = {};
   const activeTrips = new Map<string, string>();
+  let nextPayload: unknown = firstPayload;
 
   while (true) {
-    const payload = await requestApiData<unknown>({
-      key: 'vehicles',
-      config: {
-        query: {
-          include: 'route,trip',
-          'fields[vehicle]': 'current_status,route,trip',
-          'fields[route]': 'short_name,type',
-          'page[limit]': limit,
-          'page[offset]': offset,
-        },
-      },
-    });
-    const page = parseVehiclesResponse(payload);
+    const page = parseVehiclesResponse(nextPayload);
     total += page.data.length;
     for (const vehicle of page.data) {
       const status = getString(vehicle.attributes?.current_status);
@@ -222,6 +184,18 @@ export async function getVehicleSummary(): Promise<VehicleSummary> {
     }
     if (page.data.length < limit) break;
     offset += limit;
+    nextPayload = await requestApiData<unknown>({
+      key: 'vehicles',
+      config: {
+        query: {
+          include: 'route,trip',
+          'fields[vehicle]': 'current_status,route,trip',
+          'fields[route]': 'short_name,type',
+          'page[limit]': limit,
+          'page[offset]': offset,
+        },
+      },
+    });
   }
 
   return {
@@ -264,7 +238,7 @@ export function useVehiclesQuery(
         ...vehicleFilters,
       },
     },
-    queryFn: () => getVehicles(page, pageSize, routeIds, tripIds),
+    transform: (response) => mapVehiclesPayload(response, pageSize, offset),
     options: {
       staleTime: FLEET_QUERY_STALE_TIME.vehicles,
       refetchInterval: FLEET_QUERY_REFRESH_INTERVAL.vehicles,
@@ -276,8 +250,16 @@ export function useVehicleSummaryQuery(enabled = true) {
   return useQueryApiRequest<VehicleSummary>({
     key: 'vehicles',
     queryKey: vehicleQueryKeys.summary(),
-    config: { query: { include: 'route' } },
-    queryFn: getVehicleSummary,
+    config: {
+      query: {
+        include: 'route,trip',
+        'fields[vehicle]': 'current_status,route,trip',
+        'fields[route]': 'short_name,type',
+        'page[limit]': FLEET_API_PAGE_SIZE,
+        'page[offset]': 0,
+      },
+    },
+    transform: getVehicleSummary,
     options: {
       enabled,
       staleTime: FLEET_QUERY_STALE_TIME.summary,
